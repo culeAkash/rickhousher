@@ -1,11 +1,7 @@
-import React from 'react'
+import React from "react";
 
-const DashboardPage = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+const DashboardPage = async () => {
+  return <div>Dashboard (Protected)</div>;
+};
 
 export default DashboardPage;

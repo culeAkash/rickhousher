@@ -1,0 +1,17 @@
+.bgImage {
+  background-image: url("../../../assets/auth-background.jpg");
+
+  filter: blur(2px);
+  -webkit-filter: blur(2px);
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.content {
+  background-image: url("../../../assets/auth-background.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
