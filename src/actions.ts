@@ -1,16 +1,15 @@
 "use server";
-
-import * as zod from "zod";
-import { z } from "zod";
 import { signupSchema } from "./schemas/SignUpSchema";
-import { ApiResponse, FormState } from "./utils/types";
+import { ApiResponse, SignUpFormState } from "./utils/types";
 import axios, { AxiosError } from "axios";
+// import { URLSearchParams } from "next/dist/compiled/@edge-runtime/primitives/url";
+// import { headers } from "next/headers";
 
 export const onSignUpSubmit = async (
-  prevState,
-  formData
-): Promise<FormState> => {
-  console.log(formData);
+  prevState: SignUpFormState,
+  formData: FormData
+): Promise<SignUpFormState> => {
+  // console.log(formData);
 
   const signUpData = {
     username: formData.get("username"),
@@ -19,7 +18,7 @@ export const onSignUpSubmit = async (
     confirmPassword: formData.get("confirmPassword"),
   };
 
-  console.log(signUpData);
+  // console.log(signUpData);
 
   const parse = signupSchema.safeParse(signUpData);
 
@@ -47,7 +46,7 @@ export const onSignUpSubmit = async (
       "http://localhost:3000/api/sign-up",
       signUpData
     );
-    console.log(response);
+    // console.log(response);
 
     if (response.data.success) {
       return {
@@ -58,7 +57,7 @@ export const onSignUpSubmit = async (
     }
   } catch (error) {
     const axiosError = error as AxiosError;
-    console.log(axiosError);
+    // console.log(axiosError);
 
     return {
       errors: {},

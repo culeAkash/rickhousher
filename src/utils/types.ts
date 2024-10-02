@@ -5,7 +5,7 @@ export type ApiResponse = {
   data?: any;
 };
 
-export type FormState = {
+export type SignUpFormState = {
   errors: {
     username?: string[];
     email?: string[];
@@ -14,4 +14,19 @@ export type FormState = {
   };
   message?: string;
   success?: boolean;
+};
+
+export type SidebarRoute = {
+  label: string;
+  icon: React.ComponentType<any>;
+  href: string;
+  color: string;
+};
+
+export type DashboardTool = {
+  label: string;
+  icon: React.ComponentType<any>;
+  href: string;
+  color: string;
+  bgColor: string;
 };

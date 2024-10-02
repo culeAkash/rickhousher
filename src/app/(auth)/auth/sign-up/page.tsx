@@ -15,16 +15,17 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { AtSign, Eye, EyeOff, Loader2, User } from "lucide-react";
+import { AtSign, Eye, EyeOff, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { onSignUpSubmit } from "@/actions";
-import { FormState } from "@/utils/types";
+import { SignUpFormState } from "@/utils/types";
 import { useFormState } from "react-dom";
 import { useToast } from "@/hooks/use-toast";
 import SubmitButton from "@/components/auth/SubmitButton";
+import { useRouter } from "next/navigation";
 
-const initialData: FormState = {
+const initialData: SignUpFormState = {
   errors: {
     username: [],
     email: [],
@@ -37,6 +38,7 @@ const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
@@ -48,16 +50,15 @@ const SignUpPage = () => {
     },
   });
 
-  const {
-    watch,
-    setError,
-    formState: { errors },
-  } = form;
+  const { setError } = form;
 
-  const [state, formAction] = useFormState(onSignUpSubmit, initialData);
+  const [state, formAction] = useFormState<SignUpFormState, FormData>(
+    onSignUpSubmit,
+    initialData
+  );
 
   useEffect(() => {
-    console.log(state.errors);
+    // console.log(state.errors);
     if (state.errors?.username) {
       setError("username", { message: state.errors.username[0] });
     }
@@ -79,13 +80,24 @@ const SignUpPage = () => {
         title: "Success",
         description: state?.message,
       });
+      form.reset();
+      router.replace("/auth/sign-in");
     } else if (state.success === false) {
       toast({
         title: "Error",
         description: state?.message,
+        variant: "destructive",
       });
     }
-  }, [setError, state.errors, state.message, state.success, toast]);
+  }, [
+    setError,
+    state.errors,
+    state.message,
+    state.success,
+    toast,
+    router,
+    form,
+  ]);
 
   return (
     <>
@@ -204,7 +216,7 @@ const SignUpPage = () => {
               {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
             </span>
           </div>
-          <SubmitButton />
+          <SubmitButton>Sign Up</SubmitButton>
         </form>
       </Form>
 

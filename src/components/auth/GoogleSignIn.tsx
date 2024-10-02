@@ -4,12 +4,11 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import googleImg from "../../assets/google.svg";
 import { signIn } from "next-auth/react";
-import { redirect } from "next/dist/server/api-utils";
 
 const GoogleSignIn = () => {
   const handleGoogleSignIn = () => {
     signIn("google", {
-      callbackUrl: "http://localhost:3000/dashboard",
+      redirect: false,
     });
   };
 

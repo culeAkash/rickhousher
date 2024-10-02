@@ -3,7 +3,7 @@ import { useFormStatus } from "react-dom";
 import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
 
-const SubmitButton = () => {
+const SubmitButton = ({ children } : {children :React.ReactNode}) => {
   const { pending } = useFormStatus();
   return (
     <Button
@@ -18,7 +18,7 @@ const SubmitButton = () => {
           Please wait ...
         </>
       ) : (
-        <span className="font-bold font-sans">SignUp</span>
+        <span className="font-bold font-sans">{children}</span>
       )}
     </Button>
   );

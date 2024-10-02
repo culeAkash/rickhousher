@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
     secret: process.env.NEXT_AUTH_SECRET,
   });
 
-  console.log("In middleware", token);
+  // console.log("In middleware", token);
 
   if (
     token &&
@@ -17,13 +17,13 @@ export async function middleware(request: NextRequest) {
       url.pathname.startsWith("/api/auth") ||
       !url.pathname.startsWith("/dashboard"))
   ) {
-    console.log("dashboard");
+    // console.log("dashboard");
 
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   if (url.pathname.startsWith("/dashboard") && !token) {
-    console.log("not dashboard");
+    // console.log("not dashboard");
     return NextResponse.redirect(new URL("/auth/sign-in", request.url));
   }
 }

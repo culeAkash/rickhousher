@@ -1,16 +1,17 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface User extends Document {
-  username: string;
+  username?: string;
   email: string;
   password?: string;
+  image: string;
   isSubscribed: boolean;
+  provider: string;
 }
 
 const UserSchema: Schema<User> = new Schema({
   username: {
     type: String,
-    required: [true, "Username is required"],
     trim: true,
     unique: true,
   },
@@ -29,6 +30,15 @@ const UserSchema: Schema<User> = new Schema({
   isSubscribed: {
     type: Boolean,
     default: false,
+  },
+  image: {
+    type: String,
+    default: "",
+  },
+  provider: {
+    type: String,
+    enum: ["github", "google", "credentials"],
+    default: "credentials",
   },
 });
 

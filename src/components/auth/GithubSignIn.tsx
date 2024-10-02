@@ -8,9 +8,7 @@ import { signIn } from "next-auth/react";
 const GithubSignIn = () => {
   const handleGithubSignIn = () => {
     // implement your logic here
-    signIn("github", {
-      callbackUrl: "http://localhost:3000/dashboard",
-    });
+    signIn("github", { redirect: false });
   };
 
   return (

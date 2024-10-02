@@ -15,24 +15,55 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AtSign, Eye, EyeOff } from "lucide-react";
+import { AtSign, Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import GithubSignIn from "@/components/auth/GithubSignIn";
 import GoogleSignIn from "@/components/auth/GoogleSignIn";
+import { signIn } from "next-auth/react";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
   });
+  const onSignInSubmit = async (signInData: z.infer<typeof loginSchema>) => {
+    setIsFormSubmitting(true);
+    const response = await signIn("credentials", {
+      redirect: false,
+      ...signInData,
+    });
 
-  const handleLoginSubmit = (data: z.infer<typeof loginSchema>) => {
-    console.log(data);
+    console.log(response);
+
+    if (response?.error) {
+      console.log(response.error);
+      toast({
+        title: "Error",
+        description: response.error,
+        variant: "destructive",
+      });
+      setIsFormSubmitting(false);
+      return;
+    }
+    if (response?.ok) {
+      toast({
+        title: "Success",
+        description: "Signed in successfully",
+      });
+      setIsFormSubmitting(false);
+      form.reset();
+      router.push("/dashboard"); // redirect to dashboard
+    }
   };
 
   return (
@@ -47,19 +78,19 @@ const LoginPage = () => {
       {/* form */}
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(handleLoginSubmit)}
+          onSubmit={form.handleSubmit(onSignInSubmit)}
           className="flex flex-col gap-4 p-3"
         >
           <div className="relative">
             <FormField
               control={form.control}
-              name="email"
+              name="identifier"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email/Username:</FormLabel>
                   <FormControl>
                     <Input
-                      type="email"
+                      type="text"
                       placeholder="Enter your email..."
                       {...field}
                     />
@@ -96,8 +127,20 @@ const LoginPage = () => {
             </span>
           </div>
 
-          <Button type="submit" variant={"outline"}>
-            <span className="font-bold font-sans">Login</span>
+          <Button
+            className="mt-3"
+            type="submit"
+            variant={"outline"}
+            disabled={isFormSubmitting}
+          >
+            {isFormSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Please wait ...
+              </>
+            ) : (
+              <span className="font-bold font-sans">Login</span>
+            )}
           </Button>
         </form>
       </Form>
