@@ -1,9 +1,4 @@
-export type ApiResponse = {
-  success: boolean;
-  message: string;
-  messages?: string[];
-  data?: any;
-};
+import { LucideIcon } from "lucide-react";
 
 export type SignUpFormState = {
   errors: {
@@ -18,15 +13,23 @@ export type SignUpFormState = {
 
 export type SidebarRoute = {
   label: string;
-  icon: React.ComponentType<any>;
+  icon: any;
   href: string;
   color: string;
 };
 
 export type DashboardTool = {
   label: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   href: string;
   color: string;
   bgColor: string;
+};
+
+export type HeadingProps = {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  iconColor?: string;
+  bgColor?: string;
 };

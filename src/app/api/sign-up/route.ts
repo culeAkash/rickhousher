@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/utils/db";
 import UserModel from "@/models/User";
-import { ApiResponse } from "@/utils/types";
+import { ApiResponse } from "@/types/utils";
 import bcrypt from "bcryptjs";
 
 export async function POST(request: NextRequest) {

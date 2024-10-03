@@ -4,7 +4,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 import { dbConnect } from "@/utils/db";
-import UserModel from "@/models/User";
+import UserModel, { User } from "@/models/User";
 import bcrypt from "bcryptjs";
 
 export const AuthOptions: NextAuthOptions = {
@@ -67,6 +67,12 @@ export const AuthOptions: NextAuthOptions = {
       // console.log("session : ", session);
       // console.log("token : ", token);
 
+      if (token) {
+        session.user._id = token._id as string;
+        session.user.username = token.username as string;
+        session.user.isSubscribed = token.isSubscribed as boolean;
+      }
+
       return session;
     },
     async jwt({ token, user }) {
@@ -74,15 +80,21 @@ export const AuthOptions: NextAuthOptions = {
 
       // console.log("token : ", token);
       // console.log("user : ", user);
-
+      if (user) {
+        token._id = user._id;
+        token.username = user.username;
+        token.email = user.email;
+        token.image = user.image;
+        token.isSubscribed = user.isSubscribed;
+      }
       return token;
     },
     async signIn({ profile, account, user }) {
-      console.log("Inside profile callback");
+      // console.log("Inside profile callback");
 
-      console.log(profile);
-      console.log(account);
-      console.log(user);
+      // console.log(profile);
+      // console.log(account);
+      // console.log(user);
 
       try {
         await dbConnect();
@@ -90,6 +102,10 @@ export const AuthOptions: NextAuthOptions = {
         const userExists = await UserModel.findOne({
           email: profile?.email ?? user?.email,
         });
+
+        // console.log(user);
+
+        let savedUser = userExists;
 
         if (!userExists) {
           //create new user
@@ -104,8 +120,14 @@ export const AuthOptions: NextAuthOptions = {
             provider: account?.provider,
           });
 
-          await newUser.save();
+          savedUser = await newUser.save();
         }
+
+        user._id = savedUser?._id as string;
+        user.username = savedUser?.username;
+        user.isSubscribed = savedUser?.isSubscribed;
+
+        // console.log(user);
 
         console.log("User created");
         return true;

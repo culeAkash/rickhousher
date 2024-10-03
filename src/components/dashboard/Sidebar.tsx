@@ -5,7 +5,7 @@ import React from "react";
 import logo from "../../assets/rickhousher_logo.jpg";
 import { Montserrat } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { SidebarRoute } from "@/utils/types";
+import { SidebarRoute } from "@/types/utils";
 import {
   Code,
   FileIcon,

@@ -1,7 +1,7 @@
 "use client";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { DashboardTool } from "@/utils/types";
+import { DashboardTool } from "@/types/utils";
 import {
   ArrowRight,
   Code,

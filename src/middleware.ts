@@ -22,10 +22,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if (url.pathname.startsWith("/dashboard") && !token) {
-    // console.log("not dashboard");
-    return NextResponse.redirect(new URL("/auth/sign-in", request.url));
-  }
+  // if (url.pathname.startsWith("/dashboard") && !token) {
+  //   // console.log("not dashboard");
+  //   return NextResponse.redirect(new URL("/auth/sign-in", request.url));
+  // }
 }
 
 export const config = {

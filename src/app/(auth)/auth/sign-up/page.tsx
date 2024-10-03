@@ -19,7 +19,7 @@ import { AtSign, Eye, EyeOff, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { onSignUpSubmit } from "@/actions";
-import { SignUpFormState } from "@/utils/types";
+import { SignUpFormState } from "@/types/utils";
 import { useFormState } from "react-dom";
 import { useToast } from "@/hooks/use-toast";
 import SubmitButton from "@/components/auth/SubmitButton";
