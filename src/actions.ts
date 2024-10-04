@@ -1,6 +1,7 @@
 "use server";
 import { signupSchema } from "./schemas/SignUpSchema";
-import { ApiResponse, SignUpFormState } from "./types/utils";
+import { ApiResponse } from "./types/ApiResponse";
+import { SignUpFormState } from "./types/utils";
 import axios, { AxiosError } from "axios";
 // import { URLSearchParams } from "next/dist/compiled/@edge-runtime/primitives/url";
 // import { headers } from "next/headers";
