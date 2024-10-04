@@ -1,31 +1,89 @@
-import OpenAI from "openai";
 import { Mistral } from "@mistralai/mistralai";
+import { getServerSession } from "next-auth";
+import { AuthOptions } from "../auth/[...nextauth]/options";
+
+const apiKey = process.env.MISTRAL_API_KEY;
+
+console.log(apiKey);
+
+const client = new Mistral({
+  apiKey: apiKey,
+});
 
 export const POST = async (request: Request) => {
-  const apiKey = process.env.MISTRAL_API_KEY;
+  try {
+    const session = await getServerSession(AuthOptions);
+    const { messages } = await request.json();
 
-  const client = new Mistral({
-    apiKey,
-  });
+    if (!apiKey) {
+      return Response.json(
+        {
+          success: false,
+          message: "Missing API Key",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
 
-  const { prompt } = await request.json();
+    if (!session || !session.user) {
+      return Response.json(
+        {
+          success: false,
+          message: "Not Authorized",
+        },
+        {
+          status: 401,
+        }
+      );
+    }
 
-  console.log(prompt);
+    if (!messages) {
+      return Response.json(
+        {
+          success: false,
+          message: "Missing prompt",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
 
-  const chatResponse = await client.chat.stream({
-    model: "mistral-small-latest",
-    messages: [
-      { role: "system", content: "Talk like rick sanchez from Rick and Morty" },
-      { role: "user", content: prompt },
-    ],
-  });
+    //get response from AI
 
-  for await (const chunk of chatResponse) {
-    const streamText = chunk.data.choices[0].delta.content;
-    console.log(streamText);
+    const chatResponse = await client.chat.stream({
+      model: "mistral-small-latest",
+      messages,
+    });
+
+    let newMessage: string = "";
+
+    for await (const chunk of chatResponse) {
+      const streamText = chunk.data.choices[0].delta.content;
+      if (streamText) newMessage += streamText;
+      console.log(streamText);
+    }
+    return Response.json(
+      {
+        success: true,
+        data: newMessage,
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.log(error);
+    return Response.json(
+      {
+        success: false,
+        message: "Something went wrong",
+      },
+      {
+        status: 500,
+      }
+    );
   }
-
-  return Response.json({
-    success: true,
-  });
 };

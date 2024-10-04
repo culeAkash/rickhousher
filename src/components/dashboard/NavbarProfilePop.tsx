@@ -1,19 +1,20 @@
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { PopoverTrigger } from "@radix-ui/react-popover";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import ProfileSheet from "../profile-sheet";
 
 const NavbarProfilePop = ({ user }) => {
+  console.log(user.image);
+
   return (
     <Popover>
       <PopoverTrigger asChild className="cursor-pointer">
         <Avatar>
-          <AvatarImage src={`${user?.image}.png`} alt={user?.username} />
+          <AvatarImage src={`${user?.image}`} alt={user?.username} />
           <AvatarFallback delayMs={100}>
             <User />
           </AvatarFallback>

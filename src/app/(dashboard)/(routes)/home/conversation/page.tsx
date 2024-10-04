@@ -1,4 +1,4 @@
-import ConversationForm from "@/components/conversation/form";
+import ChatSection from "@/components/conversation/chat-section";
 import Heading from "@/components/heading";
 import { MessageSquare } from "lucide-react";
 import React from "react";
@@ -15,9 +15,8 @@ const ConversationPage = () => {
       />
       <div className="px-4 lg:px-8">
         <div>
-          <ConversationForm />
+          <ChatSection />
         </div>
-        <div className="space-y-4 mt-4">Messages Content</div>
       </div>
     </div>
   );
