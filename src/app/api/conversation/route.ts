@@ -1,14 +1,16 @@
-import { Mistral } from "@mistralai/mistralai";
+import { createMistral } from "@ai-sdk/mistral";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
-
+import { convertToCoreMessages, streamText } from "ai";
 const apiKey = process.env.MISTRAL_API_KEY;
 
 console.log(apiKey);
 
-const client = new Mistral({
-  apiKey: apiKey,
+const mistral = createMistral({
+  apiKey,
 });
+
+export const maxDuration = 5000;
 
 export const POST = async (request: Request) => {
   try {
@@ -53,27 +55,16 @@ export const POST = async (request: Request) => {
 
     //get response from AI
 
-    const chatResponse = await client.chat.stream({
-      model: "mistral-small-latest",
-      messages,
+    const model = mistral("mistral-large-latest");
+
+    const result = await streamText({
+      model,
+      messages: convertToCoreMessages(messages),
     });
 
-    let newMessage: string = "";
+    const data = result.toDataStreamResponse();
 
-    for await (const chunk of chatResponse) {
-      const streamText = chunk.data.choices[0].delta.content;
-      if (streamText) newMessage += streamText;
-      console.log(streamText);
-    }
-    return Response.json(
-      {
-        success: true,
-        data: newMessage,
-      },
-      {
-        status: 200,
-      }
-    );
+    return data;
   } catch (error) {
     console.log(error);
     return Response.json(
