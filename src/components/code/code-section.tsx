@@ -23,7 +23,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import ReactMarkDown from "react-markdown";
 
-const ChatSection = () => {
+const CodeSection = () => {
   const { toast } = useToast();
 
   const [getResponse, setGetResponse] = useState(false);
@@ -86,7 +86,7 @@ const ChatSection = () => {
                       {...field}
                       className="border-0 outline-none focus-visible:ring-0 focus-visible:ring-transparent"
                       disabled={isLoading}
-                      placeholder="What is the national language of India?"
+                      placeholder="NextJs response using useChat() hook."
                     />
                   </FormControl>
                   <FormMessage />
@@ -131,7 +131,43 @@ const ChatSection = () => {
                 )}
               >
                 {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                <ReactMarkDown className="text-sm overflow-hidden leading-7 font-serif">
+                <ReactMarkDown
+                  components={{
+                    pre: ({ node, ...props }) => (
+                      <div className="overflow-auto w-full my-2 bg-black/10 p-5 rounded-lg relative">
+                        <Button
+                          type="button"
+                          className="absolute right-3 top-2 hover:bg-background hover:text-gray-950 border-2 hover:border-black box-border"
+                          onClick={(event) => {
+                            const preElement = (
+                              event?.target as Element
+                            )?.closest("div");
+
+                            if (preElement) {
+                              const pre = preElement.querySelector("pre");
+                              if (pre) {
+                                navigator.clipboard.writeText(
+                                  pre.textContent ?? ""
+                                );
+                                toast({
+                                  title: "Copied",
+                                  description: "Copied to clipboard",
+                                });
+                              }
+                            }
+                          }}
+                        >
+                          Copy
+                        </Button>
+                        <pre {...props} />
+                      </div>
+                    ),
+                    code: ({ node, ...props }) => (
+                      <code className="bg-black/10 rounded-lg p-1" {...props} />
+                    ),
+                  }}
+                  className="text-sm overflow-hidden leading-7"
+                >
                   {message.content || ""}
                 </ReactMarkDown>
               </div>
@@ -146,10 +182,11 @@ const ChatSection = () => {
               </div>
             </div>
           )}
+          {}
         </div>
       </div>
     </>
   );
 };
 
-export default ChatSection;
+export default CodeSection;
