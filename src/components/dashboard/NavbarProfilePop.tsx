@@ -4,11 +4,10 @@ import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import ProfileSheet from "../profile-sheet";
 
 const NavbarProfilePop = ({ user }) => {
-  console.log(user.image);
+  // console.log(user.image);
 
   return (
     <Popover>

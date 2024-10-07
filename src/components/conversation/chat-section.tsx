@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import UserAvatar from "../user-avatar";
 import BotAvatar from "../bot-avatar";
@@ -28,7 +28,7 @@ const ChatSection = () => {
 
   const [getResponse, setGetResponse] = useState(false);
 
-  const { messages, isLoading, stop, append } = useChat({
+  const { messages, isLoading, stop, append, error } = useChat({
     keepLastMessageOnError: true,
     api: "/api/conversation",
     onResponse: (response) => {
@@ -57,6 +57,7 @@ const ChatSection = () => {
         content: prompt,
       });
     } catch (error) {
+      setGetResponse(false);
       const axiosError = error as AxiosError;
       toast({
         title: "Error",
@@ -65,6 +66,18 @@ const ChatSection = () => {
       });
     }
   };
+
+  useEffect(() => {
+    if (error) {
+      // console.log(error.message);
+      const errorObj = JSON.parse(error.message);
+      toast({
+        title: "Error",
+        description: errorObj.message,
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   console.log(messages);
 
