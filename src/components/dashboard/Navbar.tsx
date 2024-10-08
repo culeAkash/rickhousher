@@ -9,7 +9,7 @@ import NavbarProfilePop from "./NavbarProfilePop";
 const Navbar = async () => {
   const session = await getServerSession(AuthOptions);
 
-  // console.log(session);
+  console.log(session);
 
   return (
     <div className="flex items-center p-4">

@@ -2,10 +2,8 @@ import { NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
-
-import { dbConnect } from "@/utils/db";
-import UserModel, { User } from "@/models/User";
 import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
 
 export const AuthOptions: NextAuthOptions = {
   providers: [
@@ -19,14 +17,16 @@ export const AuthOptions: NextAuthOptions = {
       async authorize(credentials: any): Promise<any> {
         // console.log(req);
 
-        await dbConnect();
+        const prisma = new PrismaClient();
         // console.log(credentials);
         try {
-          const user = await UserModel.findOne({
-            $or: [
-              { email: credentials.identifier },
-              { username: credentials.identifier },
-            ],
+          const user = await prisma.users.findFirst({
+            where: {
+              OR: [
+                { email: credentials.identifier },
+                { username: credentials.identifier },
+              ],
+            },
           });
 
           console.log("Check password");
@@ -68,7 +68,7 @@ export const AuthOptions: NextAuthOptions = {
       // console.log("token : ", token);
 
       if (token) {
-        session.user._id = token._id as string;
+        session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.isSubscribed = token.isSubscribed as boolean;
       }
@@ -81,7 +81,7 @@ export const AuthOptions: NextAuthOptions = {
       // console.log("token : ", token);
       // console.log("user : ", user);
       if (user) {
-        token._id = user._id;
+        token.id = user.id;
         token.username = user.username;
         token.email = user.email;
         token.image = user.image;
@@ -97,10 +97,12 @@ export const AuthOptions: NextAuthOptions = {
       // console.log(user);
 
       try {
-        await dbConnect();
+        const prisma = new PrismaClient();
 
-        const userExists = await UserModel.findOne({
-          email: profile?.email ?? user?.email,
+        const userExists = await prisma.users.findFirst({
+          where: {
+            email: profile?.email ?? user?.email,
+          },
         });
 
         // console.log(user);
@@ -109,21 +111,21 @@ export const AuthOptions: NextAuthOptions = {
 
         if (!userExists) {
           //create new user
-          const newUser = new UserModel({
-            username: profile?.login ?? "",
-            email: profile?.email,
-            image:
-              (profile?.picture as string) ??
-              (profile?.avatar_url as string) ??
-              "",
-            isSubscribed: false,
-            provider: account?.provider,
+          savedUser = await prisma.users.create({
+            data: {
+              username: profile?.login ?? undefined,
+              email: profile?.email as string,
+              image:
+                (profile?.picture as string) ??
+                (profile?.avatar_url as string) ??
+                "",
+              isSubscribed: false,
+              provider: account?.provider,
+            },
           });
-
-          savedUser = await newUser.save();
         }
 
-        user._id = savedUser?._id as string;
+        user.id = savedUser?.id as string;
         user.username = savedUser?.username;
         user.isSubscribed = savedUser?.isSubscribed;
 

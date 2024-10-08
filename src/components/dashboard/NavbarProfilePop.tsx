@@ -1,14 +1,11 @@
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { PopoverTrigger } from "@radix-ui/react-popover";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ProfileSheet from "../profile-sheet";
-
 const NavbarProfilePop = ({ user }) => {
-  // console.log(user.image);
-
   return (
     <Popover>
       <PopoverTrigger asChild className="cursor-pointer">
