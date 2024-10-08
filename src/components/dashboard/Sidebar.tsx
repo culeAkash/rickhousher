@@ -43,12 +43,6 @@ const routes: SidebarRoute[] = [
     color: "text-pink-700",
   },
   {
-    label: "Video Generation",
-    icon: VideoIcon,
-    href: "/home/video",
-    color: "text-orange-700",
-  },
-  {
     label: "Music Generation",
     icon: MusicIcon,
     href: "/home/music",

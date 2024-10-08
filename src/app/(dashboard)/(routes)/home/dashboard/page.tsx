@@ -30,13 +30,6 @@ const tools: DashboardTool[] = [
     bgColor: "bg-pink-700/10",
   },
   {
-    label: "Video Generation",
-    icon: VideoIcon,
-    href: "/home/video",
-    color: "text-orange-700",
-    bgColor: "bg-orange-700/10",
-  },
-  {
     label: "Music Generation",
     icon: MusicIcon,
     href: "/home/music",

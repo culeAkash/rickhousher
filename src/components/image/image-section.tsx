@@ -31,7 +31,7 @@ import Loader from "../loader";
 import { Card, CardFooter } from "../ui/card";
 import { Download } from "lucide-react";
 
-const CodeSection = () => {
+const ImageSection = () => {
   const { toast } = useToast();
   const [image, setImage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -180,4 +180,4 @@ const CodeSection = () => {
   );
 };
 
-export default CodeSection;
+export default ImageSection;

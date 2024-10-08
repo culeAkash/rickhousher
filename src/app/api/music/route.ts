@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 
-interface imageOptions {
-  prompt: string;
-  resolution: string;
-}
-
 export async function POST(request: NextRequest) {
   const session = await getServerSession(AuthOptions);
 
@@ -34,7 +29,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { prompt, resolution }: imageOptions = await request.json();
+  const { prompt } = await request.json();
 
   if (!prompt || prompt.length <= 0) {
     return NextResponse.json(
@@ -48,23 +43,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (!resolution || resolution.length <= 0) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Resolution is required",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  const height = Number.parseInt(resolution.split("x")[0]);
-  const width = Number.parseInt(resolution.split("x")[1]);
-  console.log(height);
-  console.log(width);
-
   try {
     const response = await fetch(
       "https://api-inference.huggingface.co/models/facebook/musicgen-small",
@@ -76,10 +54,6 @@ export async function POST(request: NextRequest) {
         method: "POST",
         body: JSON.stringify({
           inputs: prompt,
-          parameters: {
-            height,
-            width,
-          },
         }),
       }
     );
