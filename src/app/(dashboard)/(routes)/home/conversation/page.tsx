@@ -3,7 +3,7 @@ import Heading from "@/components/heading";
 import { MessageSquare } from "lucide-react";
 import React from "react";
 
-const ConversationPage = () => {
+const ConversationPage = async () => {
   return (
     <div>
       <Heading

@@ -2,6 +2,7 @@ import { createMistral } from "@ai-sdk/mistral";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 import { convertToCoreMessages, streamText } from "ai";
+
 const apiKey = process.env.MISTRAL_API_KEY;
 
 console.log(apiKey);
@@ -52,7 +53,6 @@ export const POST = async (request: Request) => {
         }
       );
     }
-
     //get response from AI
 
     const model = mistral("mistral-large-latest");

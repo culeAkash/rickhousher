@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { dbConnect } from "@/utils/db";
-import UserModel from "@/models/User";
-import { ApiResponse } from "@/types/utils";
+
+import { ApiResponse } from "@/types/ApiResponse";
 import bcrypt from "bcryptjs";
+import { db } from "@/db";
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -10,8 +11,10 @@ export async function POST(request: NextRequest) {
     const { username, email, password } = await request.json();
 
     // check if user with same name or email already exists
-    const existingUserByUsernameOrEmail = await UserModel.findOne({
-      $or: [{ username }, { email }],
+    const existingUserByUsernameOrEmail = await db.user.findFirst({
+      where: {
+        OR: [{ username: { equals: username } }, { email: { equals: email } }],
+      },
     });
 
     if (existingUserByUsernameOrEmail) {
@@ -29,14 +32,14 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 8);
 
     // create new user
-    const newUser = new UserModel({
-      username,
-      email,
-      password: hashedPassword,
-      isSubscribed: false,
+    await db.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+        isSubscribed: false,
+      },
     });
-
-    await newUser.save();
 
     const response: ApiResponse = {
       success: true,

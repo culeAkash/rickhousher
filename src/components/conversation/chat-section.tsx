@@ -18,22 +18,39 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import ReactMarkDown from "react-markdown";
+import Loader from "../loader";
 
 const ChatSection = () => {
   const { toast } = useToast();
 
   const [getResponse, setGetResponse] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
 
-  const { messages, isLoading, stop, append, error } = useChat({
+  const { messages, setMessages, isLoading, stop, append, error } = useChat({
     keepLastMessageOnError: true,
     api: "/api/conversation",
     onResponse: (response) => {
       setGetResponse(false);
       console.log(response);
+    },
+    onFinish: async (message) => {
+      const response = await axios.post("/api/messages", {
+        chatType: "CONVERSATION",
+        message: message.content,
+        role: "ASSISTANT",
+      });
+
+      if (!response.data.success) {
+        toast({
+          title: "Error",
+          description: response.data.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -51,11 +68,26 @@ const ChatSection = () => {
     console.log(prompt);
 
     try {
+      const response = await axios.post("/api/messages", {
+        chatType: "CONVERSATION",
+        message: prompt,
+        role: "USER",
+      });
+
+      if (!response.data.success) {
+        toast({
+          title: "Error",
+          description: response.data.message,
+          variant: "destructive",
+        });
+      }
+
       setGetResponse(true);
       append({
         role: "user",
         content: prompt,
       });
+      form.reset();
     } catch (error) {
       setGetResponse(false);
       const axiosError = error as AxiosError;
@@ -78,6 +110,34 @@ const ChatSection = () => {
       });
     }
   }, [error, toast]);
+
+  useEffect(() => {
+    async function fetchData() {
+      // setGetResponse(true);
+      setIsFetching(true);
+      const response = await axios.get("/api/messages", {
+        params: {
+          chatType: "CONVERSATION",
+        },
+      });
+
+      if (!response.data.success) {
+        // setGetResponse(false);
+        setIsFetching(false);
+        console.log(response.data.message);
+        toast({
+          title: "Error",
+          description: response.data.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      // setGetResponse(false);
+      setIsFetching(false);
+      setMessages(response.data.data);
+    }
+    fetchData();
+  }, [setMessages, toast]);
 
   console.log(messages);
 
@@ -129,7 +189,10 @@ const ChatSection = () => {
           </form>
         </Form>
         <div>
-          {messages.length === 0 && <Empty label="No Conversation Started" />}
+          {messages.length === 0 && !isFetching && (
+            <Empty label="No Conversation Started" />
+          )}
+          {messages.length === 0 && isFetching && <Loader />}
         </div>
         <div className="flex flex-col-reverse gap-y-4">
           {messages.map((message, index) => {

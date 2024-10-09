@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model users {
+model User {
   id           String  @id @default(auto()) @map("_id") @db.ObjectId
   email        String  @unique(map: "email")
   image        String  @default("")
@@ -15,4 +15,34 @@ model users {
   password     String?
   provider     String  @default("credentials")
   username     String? @unique(map: "username")
+  chatSessions ChatSession[]
+}
+
+enum Role{
+  USER
+  ASSISTANT
+}
+
+enum Type{
+  CONVERSATION
+  CODE
+}
+
+model ChatSession{
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String  @db.ObjectId
+  messages  Message[]
+  type      Type    @default(CONVERSATION)
+
+  @@unique([userId,type])
+}
+
+model Message {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  role         Role     @default(USER)
+  content      String   
+  createdAt    DateTime @default(now())
+  chatSession  ChatSession? @relation(fields: [chatSessionId], references: [id])
+  chatSessionId String? @db.ObjectId
 }

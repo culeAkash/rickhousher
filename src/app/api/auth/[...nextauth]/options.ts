@@ -3,7 +3,7 @@ import GithubProvider from "next-auth/providers/github";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { db } from "@/db";
 
 export const AuthOptions: NextAuthOptions = {
   providers: [
@@ -17,10 +17,8 @@ export const AuthOptions: NextAuthOptions = {
       async authorize(credentials: any): Promise<any> {
         // console.log(req);
 
-        const prisma = new PrismaClient();
-        // console.log(credentials);
         try {
-          const user = await prisma.users.findFirst({
+          const user = await db.user.findFirst({
             where: {
               OR: [
                 { email: credentials.identifier },
@@ -97,9 +95,7 @@ export const AuthOptions: NextAuthOptions = {
       // console.log(user);
 
       try {
-        const prisma = new PrismaClient();
-
-        const userExists = await prisma.users.findFirst({
+        const userExists = await db.user.findFirst({
           where: {
             email: profile?.email ?? user?.email,
           },
@@ -111,7 +107,7 @@ export const AuthOptions: NextAuthOptions = {
 
         if (!userExists) {
           //create new user
-          savedUser = await prisma.users.create({
+          savedUser = await db.user.create({
             data: {
               username: profile?.login ?? undefined,
               email: profile?.email as string,
