@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import z from "zod";
 import { Message } from "ai";
+import { checkApiLimit } from "@/lib/api-limit";
 
 const getMessageSchema = z.object({
   chatType: z.enum(["CONVERSATION", "CODE"], {
@@ -161,6 +162,21 @@ export const POST = async (request: NextRequest) => {
   }
 
   const { message, chatType, role } = data;
+
+  const freeTrial = checkApiLimit();
+
+  if (!freeTrial) {
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Your free trial has ended, please switch to pro plan to continue using...",
+      },
+      {
+        status: 403,
+      }
+    );
+  }
 
   try {
     const chatSession = await getChatSession({ chatType }, userId);

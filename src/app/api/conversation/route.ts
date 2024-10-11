@@ -2,6 +2,7 @@ import { createMistral } from "@ai-sdk/mistral";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 import { convertToCoreMessages, streamText } from "ai";
+import { checkApiLimit } from "@/lib/api-limit";
 
 const apiKey = process.env.MISTRAL_API_KEY;
 
@@ -54,6 +55,21 @@ export const POST = async (request: Request) => {
       );
     }
     //get response from AI
+
+    const freeTrial = checkApiLimit();
+
+    if (!freeTrial) {
+      return Response.json(
+        {
+          success: false,
+          message:
+            "Your free trial has ended, please switch to pro plan to continue using...",
+        },
+        {
+          status: 403,
+        }
+      );
+    }
 
     const model = mistral("mistral-large-latest");
 

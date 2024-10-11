@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
+import { checkApiLimit } from "@/lib/api-limit";
 
 interface imageOptions {
   prompt: string;
@@ -64,6 +65,21 @@ export async function POST(request: NextRequest) {
   const width = Number.parseInt(resolution.split("x")[1]);
   console.log(height);
   console.log(width);
+
+  const freeTrial = checkApiLimit();
+
+  if (!freeTrial) {
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Your free trial has ended, please switch to pro plan to continue using...",
+      },
+      {
+        status: 403,
+      }
+    );
+  }
 
   try {
     const response = await fetch(

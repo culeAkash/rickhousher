@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
+import { checkApiLimit } from "@/lib/api-limit";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(AuthOptions);
@@ -39,6 +40,21 @@ export async function POST(request: NextRequest) {
       },
       {
         status: 400,
+      }
+    );
+  }
+
+  const freeTrial = checkApiLimit();
+
+  if (!freeTrial) {
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Your free trial has ended, please switch to pro plan to continue using...",
+      },
+      {
+        status: 403,
       }
     );
   }
