@@ -18,8 +18,12 @@ import { useToast } from "@/hooks/use-toast";
 import { ApiResponse } from "@/types/ApiResponse";
 import Loader from "../loader";
 import { conversationFormSchema } from "@/schemas/conversationSchema";
+import { useRouter } from "next/navigation";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const MusicSection = () => {
+  const proModal = useProModal();
+  const router = useRouter();
   const { toast } = useToast();
   const [music, setMusic] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -60,11 +64,18 @@ const MusicSection = () => {
     } catch (error) {
       const axiosError = error as AxiosError;
       setIsLoading(false);
+
+      if (axiosError.status === 403) {
+        proModal.onOpen();
+      }
+
       toast({
         title: "Error",
         description: axiosError.message,
         variant: "destructive",
       });
+    } finally {
+      router.refresh();
     }
   };
 

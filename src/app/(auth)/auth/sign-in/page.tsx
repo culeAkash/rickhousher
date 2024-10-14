@@ -43,10 +43,10 @@ const LoginPage = () => {
       ...signInData,
     });
 
-    console.log(response);
+    // console.log(response);
 
     if (response?.error) {
-      console.log(response.error);
+      // console.log(response.error);
       toast({
         title: "Error",
         description: response.error,

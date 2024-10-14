@@ -2,11 +2,11 @@ import { createMistral } from "@ai-sdk/mistral";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 import { convertToCoreMessages, streamText } from "ai";
-import { checkApiLimit } from "@/lib/api-limit";
+import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
 
 const apiKey = process.env.MISTRAL_API_KEY;
 
-console.log(apiKey);
+// console.log(apiKey);
 
 const mistral = createMistral({
   apiKey,
@@ -56,7 +56,9 @@ export const POST = async (request: Request) => {
     }
     //get response from AI
 
-    const freeTrial = checkApiLimit();
+    const freeTrial = await checkApiLimit();
+
+    console.log(freeTrial);
 
     if (!freeTrial) {
       return Response.json(
@@ -70,6 +72,7 @@ export const POST = async (request: Request) => {
         }
       );
     }
+    await increaseApiLimit();
 
     const model = mistral("mistral-large-latest");
 

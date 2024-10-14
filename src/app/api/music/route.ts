@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
-import { checkApiLimit } from "@/lib/api-limit";
+import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(AuthOptions);
@@ -77,6 +77,8 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       throw new Error(response.statusText);
     }
+
+    await increaseApiLimit();
 
     const result = await response.blob();
     const arrayBuffer = await result.arrayBuffer();

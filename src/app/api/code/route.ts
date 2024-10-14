@@ -2,7 +2,7 @@ import { createMistral } from "@ai-sdk/mistral";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 import { convertToCoreMessages, streamText } from "ai";
-import { checkApiLimit } from "@/lib/api-limit";
+import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
 const apiKey = process.env.MISTRAL_API_KEY;
 
 console.log(apiKey);
@@ -79,6 +79,8 @@ export const POST = async (request: Request) => {
         "You are a code generator. You must only answer only in markdown code snippets. Use code comments for explanations",
       messages: convertToCoreMessages(messages),
     });
+
+    await increaseApiLimit();
 
     const data = result.toDataStreamResponse();
 

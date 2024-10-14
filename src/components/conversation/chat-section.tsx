@@ -18,14 +18,18 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import ReactMarkDown from "react-markdown";
 import Loader from "../loader";
+import { useRouter } from "next/navigation";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const ChatSection = () => {
   const { toast } = useToast();
+  const router = useRouter();
+  const proModal = useProModal();
 
   const [getResponse, setGetResponse] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -35,7 +39,10 @@ const ChatSection = () => {
     api: "/api/conversation",
     onResponse: (response) => {
       setGetResponse(false);
-      console.log(response);
+      console.log(response.status);
+      if (response.status === 403) {
+        proModal.onOpen();
+      }
     },
     onFinish: async (message) => {
       const response = await axios.post("/api/messages", {
@@ -65,44 +72,38 @@ const ChatSection = () => {
     formData: z.infer<typeof conversationFormSchema>
   ) => {
     const { prompt } = formData;
-    console.log(prompt);
+    // console.log(prompt);
+    const response = await axios.post("/api/messages", {
+      chatType: "CONVERSATION",
+      message: prompt,
+      role: "USER",
+    });
 
-    try {
-      const response = await axios.post("/api/messages", {
-        chatType: "CONVERSATION",
-        message: prompt,
-        role: "USER",
-      });
-
-      if (!response.data.success) {
-        toast({
-          title: "Error",
-          description: response.data.message,
-          variant: "destructive",
-        });
-      }
-
-      setGetResponse(true);
-      append({
-        role: "user",
-        content: prompt,
-      });
-      form.reset();
-    } catch (error) {
-      setGetResponse(false);
-      const axiosError = error as AxiosError;
+    if (!response.data.success) {
       toast({
         title: "Error",
-        description: axiosError.message,
+        description: response.data.message,
         variant: "destructive",
       });
     }
+
+    setGetResponse(true);
+    append({
+      role: "user",
+      content: prompt,
+    });
+    form.reset();
+
+    router.refresh();
   };
 
   useEffect(() => {
     if (error) {
-      // console.log(error.message);
+      console.log(error);
       const errorObj = JSON.parse(error.message);
+
+      console.log(errorObj);
+
       toast({
         title: "Error",
         description: errorObj.message,
@@ -124,7 +125,7 @@ const ChatSection = () => {
       if (!response.data.success) {
         // setGetResponse(false);
         setIsFetching(false);
-        console.log(response.data.message);
+        // console.log(response.data.message);
         toast({
           title: "Error",
           description: response.data.message,
@@ -139,7 +140,7 @@ const ChatSection = () => {
     fetchData();
   }, [setMessages, toast]);
 
-  console.log(messages);
+  // console.log(messages);
 
   return (
     <>

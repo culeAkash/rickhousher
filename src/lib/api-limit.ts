@@ -49,7 +49,25 @@ export const checkApiLimit = async () => {
     },
   });
 
+  console.log(userApiLimit);
+
   if (!userApiLimit || userApiLimit.count <= MAX_FREE_USAGE_COUNTS) return true;
 
   return false;
+};
+
+export const getApiLimitCount = async () => {
+  const session = await getServerSession(AuthOptions);
+
+  if (!session || !session.user || !session.user.id) {
+    return 0;
+  }
+
+  const userApiLimit = await db.userApiLimit.findUnique({
+    where: {
+      userId: session.user.id,
+    },
+  });
+
+  return userApiLimit?.count;
 };

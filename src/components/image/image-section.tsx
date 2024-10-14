@@ -30,8 +30,12 @@ import Image from "next/image";
 import Loader from "../loader";
 import { Card, CardFooter } from "../ui/card";
 import { Download } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 const ImageSection = () => {
+  const proModal = useProModal();
+  const router = useRouter();
   const { toast } = useToast();
   const [image, setImage] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
@@ -72,11 +76,18 @@ const ImageSection = () => {
     } catch (error) {
       const axiosError = error as AxiosError;
       setIsLoading(false);
+
+      if (axiosError.status === 403) {
+        proModal.onOpen();
+      }
+
       toast({
         title: "Error",
         description: axiosError.message,
         variant: "destructive",
       });
+    } finally {
+      router.refresh();
     }
   };
 

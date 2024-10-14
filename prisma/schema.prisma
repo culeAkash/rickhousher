@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id           String  @id @default(cuid()) @map("_id") @db.ObjectId
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
   email        String  @unique(map: "email")
   image        String  @default("")
   isSubscribed Boolean @default(false)
@@ -30,7 +30,7 @@ enum Type{
 }
 
 model ChatSession{
-  id        String  @id @default(cuid()) @map("_id") @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
   user      User    @relation(fields: [userId], references: [id])
   userId    String  @db.ObjectId
   messages  Message[]
@@ -40,7 +40,7 @@ model ChatSession{
 }
 
 model Message {
-  id           String   @id @default(cuid()) @map("_id") @db.ObjectId
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   role         Role     @default(USER)
   content      String   
   createdAt    DateTime @default(now())
@@ -50,7 +50,7 @@ model Message {
 
 
 model UserApiLimit{
-  id           String  @id @default(cuid()) @map("_id") @db.ObjectId
+  id           String  @id @default(auto()) @map("_id") @db.ObjectId
   userId       String  @unique @db.ObjectId
   user         User    @relation(fields: [userId],references: [id])
   count        Int     @default(0)
