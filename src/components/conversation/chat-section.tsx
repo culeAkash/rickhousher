@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import UserAvatar from "../user-avatar";
-import BotAvatar from "../bot-avatar";
-import Empty from "../empty";
+import UserAvatar from "@/components/user-avatar";
+import BotAvatar from "@/components/bot-avatar";
+import Empty from "@/components/empty";
 import { useChat } from "ai/react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -15,14 +15,14 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkDown from "react-markdown";
-import Loader from "../loader";
+import Loader from "@/components/loader";
 import { useRouter } from "next/navigation";
 import { useProModal } from "@/hooks/use-pro-modal";
 
