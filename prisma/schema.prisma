@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id           String  @id @default(auto()) @map("_id") @db.ObjectId
+  id           String  @id @default(cuid()) @map("_id")
   email        String  @unique(map: "email")
   image        String  @default("")
   isSubscribed Boolean @default(false)
@@ -17,6 +17,7 @@ model User {
   username     String? @unique(map: "username")
   chatSessions ChatSession[]
   apiLimit     UserApiLimit?
+  files File[]
 }
 
 enum Role{
@@ -30,9 +31,9 @@ enum Type{
 }
 
 model ChatSession{
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  id        String  @id @default(cuid()) @map("_id")
   user      User    @relation(fields: [userId], references: [id])
-  userId    String  @db.ObjectId
+  userId    String  
   messages  Message[]
   type      Type    @default(CONVERSATION)
 
@@ -40,20 +41,41 @@ model ChatSession{
 }
 
 model Message {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  id           String   @id @default(cuid()) @map("_id") 
   role         Role     @default(USER)
   content      String   
   createdAt    DateTime @default(now())
   chatSession  ChatSession? @relation(fields: [chatSessionId], references: [id])
-  chatSessionId String? @db.ObjectId
+  chatSessionId String? 
 }
 
 
 model UserApiLimit{
-  id           String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String  @unique @db.ObjectId
+  id           String  @id @default(cuid()) @map("_id") 
+  userId       String  @unique 
   user         User    @relation(fields: [userId],references: [id])
   count        Int     @default(0)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+}
+
+
+enum UploadStatus{
+  PENDING
+  PROCESSING
+  FAILED
+  SUCCESS
+}
+
+
+model File{
+  id String @id @default(cuid()) @map("_id") 
+  fileName String
+  fileUploadStatus UploadStatus @default(PENDING)
+  fileUrl String
+  key String
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt
+  userId       String  @unique 
+  user         User    @relation(fields: [userId],references: [id])
 }
