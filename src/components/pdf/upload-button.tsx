@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import UploadDropzone from "./upload-dropzone";
 
 const UploadButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +24,9 @@ const UploadButton = () => {
         </Button>
       </DialogTrigger>
 
-      <DialogContent>Example content</DialogContent>
+      <DialogContent>
+        <UploadDropzone />
+      </DialogContent>
     </Dialog>
   );
 };

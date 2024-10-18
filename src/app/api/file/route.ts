@@ -2,7 +2,6 @@ import { db } from "@/db";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { AuthOptions } from "../auth/[...nextauth]/options";
-import { revalidatePath } from "next/cache";
 
 export const GET = async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
@@ -105,8 +104,6 @@ export const DELETE = async (request: NextRequest) => {
         id: fileId,
       },
     });
-
-    revalidatePath("/home/pdf");
     return NextResponse.json(
       {
         success: true,
