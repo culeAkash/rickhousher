@@ -36,7 +36,7 @@ export const GET = async (
   }
 
   try {
-    const file = await db.file.findUnique({
+    const file = await db.file.findFirst({
       where: {
         key: fileKey,
         userId: session.user.id,
