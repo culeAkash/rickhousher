@@ -3,52 +3,6 @@ import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 
-export const GET = async (request: NextRequest) => {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get("userId");
-
-  if (!userId) {
-    return NextResponse.json(
-      {
-        success: false,
-        message: "userId is required",
-      },
-      {
-        status: 400,
-      }
-    );
-  }
-
-  try {
-    const files = await db.file.findMany({
-      where: {
-        userId,
-      },
-    });
-
-    return NextResponse.json(
-      {
-        success: true,
-        data: files,
-      },
-      {
-        status: 200,
-      }
-    );
-  } catch (error) {
-    console.log(error);
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Error fetching files",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-};
-
 export const DELETE = async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
 

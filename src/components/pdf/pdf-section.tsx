@@ -1,46 +1,46 @@
 import React from "react";
 import UploadButton from "./upload-button";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import axios from "axios";
 import Empty from "../empty";
-import { AuthOptions } from "@/app/api/auth/[...nextauth]/options";
 import { File } from "@prisma/client";
 import Link from "next/link";
 import { MessageSquare, Plus } from "lucide-react";
 import { format } from "date-fns";
 import DeleteFileButton from "./delete-file-button";
+import { db } from "@/db";
+import { getServerSession } from "next-auth";
+import { AuthOptions } from "@/app/api/auth/[...nextauth]/options";
+import { redirect } from "next/navigation";
 
 const PdfSection = async () => {
   const session = await getServerSession(AuthOptions);
-  console.log(session);
 
   if (!session || !session.user || !session.user.id) {
     redirect("/auth/sign-in");
+    return;
   }
 
-  const response = await axios.get(`${process.env.NEXTAUTH_URL}/api/file`, {
-    params: {
-      userId: session?.user.id,
-    },
-  });
+  let files: File[] = [];
 
-  let files: File[];
-
-  if (!response.data.success) {
-    console.log(response.data.message);
-    files = [];
-  } else {
-    files = response.data.data;
+  try {
+    files = await db.file.findMany({
+      where: {
+        userId: session.user.id,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    return (
+      <Empty label="Couldn't fetch files at this moment. Please try again later!" />
+    );
   }
 
   return (
     <>
       <div className="flex justify-between">
-        <h1 className="text-lg font-medium text-zinc-700">My Files</h1>
+        <h1 className="text-3xl font-lg text-zinc-700">My Files</h1>
         <UploadButton />
       </div>
-      {files && files?.length !== 0 ? (
+      {files && files.length !== 0 ? (
         <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
           {files
             .sort(
@@ -54,7 +54,7 @@ const PdfSection = async () => {
                 className="col-span-1 divide-y divide-gray-200 bg-white shadow transition hover:shadow-lg"
               >
                 <Link
-                  href={`/home/pdf/${file.id}`}
+                  href={`/home/pdf/${file.key}`}
                   className="flex flex-col gap-2"
                 >
                   <div

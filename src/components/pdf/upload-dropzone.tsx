@@ -1,12 +1,21 @@
 "use client";
-import { Cloud, File } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Cloud, File, Loader2 } from "lucide-react";
+import React, { useState } from "react";
 import Dropzone from "react-dropzone";
 import { Progress } from "../ui/progress";
-
+import { useUploadThing } from "../../utils/uploadthing";
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+import { File as PdfFile } from "@prisma/client";
 const UploadDropzone = () => {
-  const [isUploading, setIsUploading] = useState<boolean | null>(true);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+
+  const { startUpload } = useUploadThing("pdfUploader");
+
+  const { toast } = useToast();
+  const router = useRouter();
 
   const startSimulatedProgress = () => {
     setUploadProgress(0);
@@ -31,12 +40,56 @@ const UploadDropzone = () => {
         setIsUploading(true);
         const interval = startSimulatedProgress();
         // TODO : add file to db
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        console.log("Uploading to uploadthing");
+
+        const res = await startUpload(acceptedFile);
+
+        console.log(res);
+
+        if (!res) {
+          return toast({
+            title: "Something went wrong",
+            description: "Please try again later!",
+            variant: "destructive",
+          });
+        }
+
+        const [fileResponse] = res;
+
+        const key = fileResponse?.key;
+
+        if (!key) {
+          return toast({
+            title: "Something went wrong",
+            description: "Please try again later!",
+            variant: "destructive",
+          });
+        }
+
+        console.log(key);
 
         // TODO : clear interval
         clearInterval(interval);
         // TODO : set progress bar to 100
         setUploadProgress(100);
+        const uploadInterval = setInterval(async () => {
+          const response = await axios.get(`/api/file/${key}`);
+
+          if (!response.data.success && response.status !== 404) {
+            console.log(response.data);
+
+            clearInterval(uploadInterval);
+            return toast({
+              title: "Something went wrong",
+              description: "Please try again later!",
+              variant: "destructive",
+            });
+          } else if (response.data.success) {
+            clearInterval(uploadInterval);
+            const file: PdfFile = response.data.data as PdfFile;
+            router.replace(`/home/pdf/${file.key}`);
+          }
+        }, 500);
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
@@ -73,10 +126,22 @@ const UploadDropzone = () => {
                     value={uploadProgress}
                     className="h-1 w-full bg-zinc-200"
                   />
+                  {uploadProgress === 100 ? (
+                    <div className="flex gap-1 items-center justify-center text-sm text-zinc-500 mt-3">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Redirecting...
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </label>
-            <input {...getInputProps()} id="dropzone-file" />
+            <input
+              disabled={isUploading}
+              {...getInputProps()}
+              type="file"
+              className="hidden"
+              id="dropzone-file"
+            />
           </div>
         </div>
       )}

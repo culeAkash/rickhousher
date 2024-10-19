@@ -1,17 +1,33 @@
 import { db } from "@/db";
+import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { AuthOptions } from "../../auth/[...nextauth]/options";
 
 export const GET = async (
   request: NextRequest,
-  { params }: { params: { fileId: string } }
+  { params }: { params: { fileKey: string } }
 ) => {
-  const { fileId } = params;
+  const { fileKey } = params;
 
-  if (!fileId) {
+  const session = await getServerSession(AuthOptions);
+
+  if (!session || !session.user || !session?.user.id) {
     return NextResponse.json(
       {
         success: false,
-        message: "fileId is required",
+        message: "Not Authorized",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+
+  if (!fileKey) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "file key is required",
       },
       {
         status: 400,
@@ -22,7 +38,8 @@ export const GET = async (
   try {
     const file = await db.file.findUnique({
       where: {
-        id: Array.isArray(fileId) ? fileId[0] : fileId,
+        key: fileKey,
+        userId: session.user.id,
       },
     });
 
