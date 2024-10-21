@@ -119,7 +119,7 @@ const MusicSection = () => {
       <div className="space-y-4 mt-4 flex items-center justify-center">
         {isLoading && (
           <div className="p-20">
-            <Loader />
+            <Loader label="Getting your desired result... Please wait..." />
           </div>
         )}
         {music.length === 0 && !isLoading && (

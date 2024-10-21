@@ -1,5 +1,5 @@
 import { AuthOptions } from "@/app/api/auth/[...nextauth]/options";
-import ChatWrapper from "@/components/pdf/chat-wrapper";
+import ChatWrapper from "@/components/pdf/chat/chat-wrapper";
 import PdfRenderer from "@/components/pdf/pdf-renderer";
 import { db } from "@/db";
 import { getServerSession } from "next-auth";
@@ -38,8 +38,8 @@ const FilePage = async ({ params }: PageProps) => {
               <PdfRenderer fileUrl={file.fileUrl} />
             </div>
           </div>
-          <div className="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0">
-            <ChatWrapper />
+          <div className="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0 mb-2">
+            <ChatWrapper fileKey={file.key} userId={file.userId} />
           </div>
         </div>
       </div>

@@ -190,7 +190,9 @@ const CodeSection = () => {
           {messages.length === 0 && !isFetching && (
             <Empty label="No Conversation Started" />
           )}
-          {messages.length === 0 && isFetching && <Loader />}
+          {messages.length === 0 && isFetching && (
+            <Loader label="Getting your desired result... Please wait..." />
+          )}
         </div>
         <div className="flex flex-col-reverse gap-y-4">
           {messages.map((message, index) => {

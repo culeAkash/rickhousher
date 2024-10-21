@@ -14,7 +14,11 @@ const PdfAssistantPage = () => {
     <div>
       <div className="px-4 lg:px-8 h-fit">
         <ErrorBoundary errorComponent={ErrorComponent}>
-          <Suspense fallback={<Loader />}>
+          <Suspense
+            fallback={
+              <Loader label="Getting your desired result... Please wait..." />
+            }
+          >
             <PdfSection />
           </Suspense>
         </ErrorBoundary>
