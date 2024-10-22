@@ -28,6 +28,7 @@ enum Role{
 enum Type{
   CONVERSATION
   CODE
+  PDF
 }
 
 model ChatSession{
@@ -36,8 +37,7 @@ model ChatSession{
   userId    String  
   messages  Message[]
   type      Type    @default(CONVERSATION)
-
-  @@unique([userId,type])
+  file File? 
 }
 
 model Message {
@@ -46,7 +46,7 @@ model Message {
   content      String   
   createdAt    DateTime @default(now())
   chatSession  ChatSession? @relation(fields: [chatSessionId], references: [id])
-  chatSessionId String? 
+  chatSessionId String?
 }
 
 
@@ -76,6 +76,8 @@ model File{
   key String
   createdAt DateTime @default(now()) 
   updatedAt DateTime @updatedAt
-  userId       String  
+  userId       String
   user         User    @relation(fields: [userId],references: [id])
+  chatSessionId String? @unique
+  chatSession ChatSession? @relation(fields: [chatSessionId],references: [id])
 }

@@ -33,3 +33,10 @@ export type HeadingProps = {
   iconColor?: string;
   bgColor?: string;
 };
+
+export type StreamResponse = {
+  addMessage: () => void;
+  message: string;
+  handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  isLoading: boolean;
+};
