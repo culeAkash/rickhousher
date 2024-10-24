@@ -37,6 +37,6 @@ export type HeadingProps = {
 export type StreamResponse = {
   addMessage: () => void;
   message: string;
-  handleInputChange: (event: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isLoading: boolean;
 };

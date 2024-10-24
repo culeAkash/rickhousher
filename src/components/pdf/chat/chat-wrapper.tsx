@@ -4,17 +4,18 @@ import ChatInput from "./chat-input";
 import { getFileUploadStatus } from "@/actions";
 import { UploadStatus } from "@prisma/client";
 import Loader from "@/components/loader";
-import { ChevronLeft, XCircle, XIcon } from "lucide-react";
-import { ApiResponse } from "../../../types/ApiResponse";
+import { ChevronLeft, XCircle } from "lucide-react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { ChatContextProvider } from "@/context/chat-context-provider";
+import Messages from "./messages";
 
 interface chatwrapperProps {
-  fileKey: string;
+  fileId: string;
   userId: string;
 }
 
-const ChatWrapper = ({ fileKey, userId }: chatwrapperProps) => {
+const ChatWrapper = ({ fileId, userId }: chatwrapperProps) => {
   const [fileUploadStatus, setFileUploadStatus] = useState<UploadStatus | null>(
     null
   );
@@ -22,13 +23,13 @@ const ChatWrapper = ({ fileKey, userId }: chatwrapperProps) => {
   useEffect(() => {
     let fileUploadStatus;
     const uploadStatusInterval = setInterval(async () => {
-      fileUploadStatus = await getFileUploadStatus({ fileKey, userId });
+      fileUploadStatus = await getFileUploadStatus({ fileId, userId });
       setFileUploadStatus(fileUploadStatus);
       if (fileUploadStatus === "SUCCESS" || fileUploadStatus === "FAILED") {
         clearInterval(uploadStatusInterval);
       }
     }, 500);
-  }, [fileKey, userId]);
+  }, [fileId, userId]);
 
   if (!fileUploadStatus) {
     return (
@@ -74,9 +75,12 @@ const ChatWrapper = ({ fileKey, userId }: chatwrapperProps) => {
   }
 
   return (
-    <div className="space-y-4 mt-4 px-2">
-      <ChatInput isDisabled={false} />
-    </div>
+    <ChatContextProvider fileId={fileId}>
+      <div className="space-y-4 mt-4 px-2">
+        <ChatInput isDisabled={false} />
+      </div>
+      <Messages />
+    </ChatContextProvider>
   );
 };
 

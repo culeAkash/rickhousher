@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 import { pdfMessageSchema } from "@/lib/validators/message-validators";
 import { db } from "@/db";
+import { MistralAIEmbeddings } from "@langchain/mistralai";
+import { pinecone } from "@/lib/pinecone";
+import { PineconeStore } from "@langchain/pinecone";
+import { convertToCoreMessages, streamText } from "ai";
+import { createMistral } from "@ai-sdk/mistral";
+
+const apiKey = process.env.MISTRAL_API_KEY;
+const mistral = createMistral({
+  apiKey,
+});
 
 export const POST = async (request: NextRequest) => {
   // endpoint for asking a question to a pdf file
@@ -60,13 +70,105 @@ export const POST = async (request: NextRequest) => {
     );
   }
 
-  await db.message.create({
-    data: {
-      content: message,
-      chatSessionId: file.chatSessionId,
-      role: "USER",
-    },
-  });
+  try {
+    await db.message.create({
+      data: {
+        content: message,
+        chatSessionId: file.chatSessionId,
+        role: "USER",
+      },
+    });
 
-  //
+    //1. vectorize the user message
+    const embeddings = new MistralAIEmbeddings({
+      apiKey: process.env.MISTRAL_API_KEY!,
+      model: "mistral-embed",
+    });
+
+    const pineconeIndex = pinecone.Index("rickhousher");
+
+    const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
+      pineconeIndex,
+      namespace: file.id,
+    });
+
+    const results = await vectorStore.similaritySearch(message, 4);
+    const context = results.map((r) => r.pageContent).join("\n\n");
+    console.log(context);
+
+    const prevMessages = await db.message.findMany({
+      where: {
+        chatSessionId: file.chatSessionId,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      take: 10,
+    });
+
+    const formattedMessages = prevMessages.map((message) => ({
+      role:
+        message.role === "USER" ? ("user" as const) : ("assistant" as const),
+      content: message.content,
+    }));
+
+    const model = mistral("mistral-large-latest");
+    const chatResult = await streamText({
+      model,
+      messages: convertToCoreMessages([
+        {
+          role: "system",
+          content:
+            "Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format but don't include ```markdown at the start neither end the response with ```.",
+        },
+        {
+          role: "user",
+          content: `Use the following pieces of context (or previous conversaton if needed) to answer the users question in markdown format. \nIf you don't know the answer, just say that you don't know, don't try to make up an answer.
+        
+  \n----------------\n
+  
+  PREVIOUS CONVERSATION:
+  ${formattedMessages.map((message) => {
+    if (message.role === "user") return `User: ${message.content}\n`;
+    return `Assistant: ${message.content}\n`;
+  })}
+  
+  \n----------------\n
+  
+  CONTEXT:
+  ${results.map((r) => r.pageContent).join("\n\n")}
+  
+  USER INPUT: ${message}`,
+        },
+      ]),
+    });
+
+    let aiResponse = "";
+    for await (const textPart of chatResult.textStream) {
+      aiResponse += textPart;
+    }
+
+    await db.message.create({
+      data: {
+        content: aiResponse,
+        chatSessionId: file.chatSessionId,
+        role: "ASSISTANT",
+      },
+    });
+
+    const streamData = chatResult.toDataStreamResponse();
+
+    return streamData;
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Something went wrong",
+      },
+      {
+        status: 500,
+      }
+    );
+  }
 };

@@ -60,13 +60,19 @@ export const ourFileRouter = {
 
         const embeddings = new MistralAIEmbeddings({
           apiKey: process.env.MISTRAL_API_KEY!,
-          model: "mistral-large-latest",
+          model: "mistral-embed",
         });
 
-        await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
-          pineconeIndex,
-          namespace: createdFile.id,
-        });
+        const res = await PineconeStore.fromDocuments(
+          pageLevelDocs,
+          embeddings,
+          {
+            pineconeIndex,
+            namespace: createdFile.id,
+          }
+        );
+
+        console.log(res);
 
         await db.file.update({
           data: {

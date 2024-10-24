@@ -75,20 +75,20 @@ export const onSignUpSubmit = async (
 };
 
 export async function getFileUploadStatus({
-  fileKey,
+  fileId,
   userId,
 }: {
-  fileKey: string;
+  fileId: string;
   userId: string;
 }): Promise<UploadStatus> {
-  if (!fileKey || !userId) {
+  if (!fileId || !userId) {
     return "PENDING" as const;
   }
 
   try {
     const file = await db.file.findFirst({
       where: {
-        key: fileKey,
+        id: fileId,
         userId,
       },
     });

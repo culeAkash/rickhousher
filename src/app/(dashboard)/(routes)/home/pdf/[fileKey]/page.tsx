@@ -39,7 +39,7 @@ const FilePage = async ({ params }: PageProps) => {
             </div>
           </div>
           <div className="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0 mb-2">
-            <ChatWrapper fileKey={file.key} userId={file.userId} />
+            <ChatWrapper fileId={file.id} userId={file.userId} />
           </div>
         </div>
       </div>
