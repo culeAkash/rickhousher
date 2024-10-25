@@ -19,3 +19,9 @@ export const pdfMessageSchema = z.object({
   message: z.string().min(1, { message: "Message can't be empty" }),
   fileId: z.string({ message: "fileId must be string" }),
 });
+
+export const pdfFetchMessagesSchema = z.object({
+  fileId: z.string({ message: "fileId must be string" }),
+  limit: z.number().min(1).max(100).nullish(),
+  cursor: z.string().nullish(),
+});

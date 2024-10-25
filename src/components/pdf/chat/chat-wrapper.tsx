@@ -79,7 +79,7 @@ const ChatWrapper = ({ fileId, userId }: chatwrapperProps) => {
       <div className="space-y-4 mt-4 px-2">
         <ChatInput isDisabled={false} />
       </div>
-      <Messages />
+      <Messages fileId={fileId} />
     </ChatContextProvider>
   );
 };

@@ -93,8 +93,8 @@ export const POST = async (request: NextRequest) => {
     });
 
     const results = await vectorStore.similaritySearch(message, 4);
-    const context = results.map((r) => r.pageContent).join("\n\n");
-    console.log(context);
+    // const context = results.map((r) => r.pageContent).join("\n\n");
+    // console.log(context);
 
     const prevMessages = await db.message.findMany({
       where: {

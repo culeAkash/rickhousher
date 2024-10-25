@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import { LucideIcon } from "lucide-react";
 
 export type SignUpFormState = {
@@ -39,4 +40,11 @@ export type StreamResponse = {
   message: string;
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   isLoading: boolean;
+};
+
+export type ExtendedMessage = {
+  id: string;
+  content: string | JSX.Element;
+  createdAt: Date;
+  role: string;
 };
