@@ -35,11 +35,17 @@ const Messages = ({ fileId }: MessageProps) => {
       const result = response.data;
 
       if (result.success) {
+        console.log(result.data.messages);
+
         setMessages((prevMessages) => {
+          console.log(prevMessages);
           return [...prevMessages, ...result.data.messages];
         });
+
         setNextCursor(result.data.nextCursor);
+
         setHasMore(Boolean(result.data.nextCursor));
+        console.log("fetching messages");
       } else {
         toast({
           title: "Error",
@@ -64,9 +70,11 @@ const Messages = ({ fileId }: MessageProps) => {
     fetchMessages();
   }, []);
 
+  console.log(messages);
+
   const combinedMessages = [
     ...(messages ?? []),
-    // ...(true ? [loadingMessage] : []),
+    // ...(loadingMessage ?  : []),
   ];
 
   if (!loading && !hasMore && combinedMessages.length === 0) {
@@ -74,6 +82,8 @@ const Messages = ({ fileId }: MessageProps) => {
       <Empty label="You are all set... Start asking your first question" />
     );
   }
+
+  console.log(combinedMessages);
 
   return (
     <div className="flex max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200 flex-1 flex-col gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-round scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">

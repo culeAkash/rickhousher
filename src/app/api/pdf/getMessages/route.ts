@@ -8,7 +8,11 @@ import { db } from "@/db";
 export const POST = async (request: NextRequest) => {
   const body = await request.json();
 
+  console.log("Fetching messages");
+
   const { data, error } = pdfFetchMessagesSchema.safeParse(body);
+
+  console.log(data);
 
   if (error) {
     return NextResponse.json(

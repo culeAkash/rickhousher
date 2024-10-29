@@ -49,7 +49,7 @@ const PdfRenderer = ({ fileUrl }: PdfRendererProps) => {
         <Worker
           workerUrl={`https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js`}
         >
-          <div className="h-[625px]">
+          <div className="h-[1000px]">
             <Viewer
               fileUrl={fileUrl}
               renderLoader={() => (
