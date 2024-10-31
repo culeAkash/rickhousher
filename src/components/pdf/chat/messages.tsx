@@ -3,10 +3,11 @@ import Empty from "@/components/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Message } from "@prisma/client";
-import { MessageSquare } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Loader2, MessageSquare } from "lucide-react";
+import React, { useContext, useEffect, useState } from "react";
 import MessageBox from "./message";
 import axios from "axios";
+import { ChatContext } from "@/context/chat-context-provider";
 
 interface MessageProps {
   fileId: string;
@@ -18,12 +19,17 @@ const Messages = ({ fileId }: MessageProps) => {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
+  const { isLoading: isAiThinking } = useContext(ChatContext);
+
+  console.log(isAiThinking ? "Loading" : "Not Loading");
+
   const { toast } = useToast();
 
   const fetchMessages = async () => {
-    if (loading || !hasMore) return;
+    if (loading || !hasMore || isAiThinking) return;
 
     setLoading(true);
+    console.log("fetching messages");
 
     try {
       const response = await axios.post("/api/pdf/getMessages", {
@@ -68,13 +74,29 @@ const Messages = ({ fileId }: MessageProps) => {
 
   useEffect(() => {
     fetchMessages();
-  }, []);
+  }, [isAiThinking]);
 
   console.log(messages);
 
+  const loadingMessage = {
+    createdAt: new Date(),
+    id: "loading-message",
+    isUserMessage: false,
+    content: (
+      <div className="p-8 w-full flex items-start gap-x-8 rounded-lg relative bg-red-800/10 border-red-800/10">
+        <Skeleton className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full" />
+        <div className="space-y-2 w-full">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-1/2" />
+        </div>
+      </div>
+    ),
+    role: "ASSISTANT",
+  };
+
   const combinedMessages = [
+    ...(isAiThinking ? [loadingMessage] : []),
     ...(messages ?? []),
-    // ...(loadingMessage ?  : []),
   ];
 
   if (!loading && !hasMore && combinedMessages.length === 0) {

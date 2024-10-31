@@ -35,6 +35,8 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     } catch (error) {
       // error handling
     } finally {
+      console.log("finally");
+
       setIsLoading(false);
       setMessage("");
     }
