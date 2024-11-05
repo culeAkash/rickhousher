@@ -19,14 +19,14 @@ const Messages = ({ fileId }: MessageProps) => {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
-  const { isLoading: isAiThinking } = useContext(ChatContext);
+  const { isLoading: isAiThinking, message } = useContext(ChatContext);
 
   console.log(isAiThinking ? "Loading" : "Not Loading");
 
   const { toast } = useToast();
 
-  const fetchMessages = async () => {
-    if (loading || !hasMore || isAiThinking) return;
+  const fetchInitialMessages = async () => {
+    if (loading || !hasMore) return;
 
     setLoading(true);
     console.log("fetching messages");
@@ -34,24 +34,16 @@ const Messages = ({ fileId }: MessageProps) => {
     try {
       const response = await axios.post("/api/pdf/getMessages", {
         fileId: fileId as string,
-        cursor: nextCursor,
+        cursor: null,
         limit: 10,
       });
 
       const result = response.data;
 
       if (result.success) {
-        console.log(result.data.messages);
-
-        setMessages((prevMessages) => {
-          console.log(prevMessages);
-          return [...prevMessages, ...result.data.messages];
-        });
-
+        setMessages(result.data.messages);
         setNextCursor(result.data.nextCursor);
-
         setHasMore(Boolean(result.data.nextCursor));
-        console.log("fetching messages");
       } else {
         toast({
           title: "Error",
@@ -73,7 +65,24 @@ const Messages = ({ fileId }: MessageProps) => {
   };
 
   useEffect(() => {
-    fetchMessages();
+    if (!isAiThinking) {
+      fetchInitialMessages();
+    } else {
+      console.log(message);
+
+      setMessages((prevMessages) => {
+        return [
+          ...prevMessages,
+          {
+            id: "current-message",
+            createdAt: new Date(),
+            content: message,
+            role: "USER",
+            chatSessionId: prevMessages[0].chatSessionId,
+          },
+        ];
+      });
+    }
   }, [isAiThinking]);
 
   console.log(messages);
@@ -108,32 +117,35 @@ const Messages = ({ fileId }: MessageProps) => {
   console.log(combinedMessages);
 
   return (
-    <div className="flex max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200 flex-1 flex-col gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-round scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
-      {combinedMessages &&
-        combinedMessages.length > 0 &&
-        combinedMessages.map((message, index) => {
-          if (combinedMessages.length - 1 === index) {
-            return <MessageBox key={index} message={message} />;
-          } else {
-            return <MessageBox key={index} message={message} />;
-          }
-        })}
+    <>
+      <div className="space-y-4 mt-4 px-2"></div>
+      <div className="flex max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200 flex-1 flex-col gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-round scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
+        {combinedMessages &&
+          combinedMessages.length > 0 &&
+          combinedMessages.map((message, index) => {
+            if (combinedMessages.length - 1 === index) {
+              return <MessageBox key={index} message={message} />;
+            } else {
+              return <MessageBox key={index} message={message} />;
+            }
+          })}
 
-      {loading && (
-        <div className="w-full flex flex-col gap-2">
-          <Skeleton className="h-16" />
-          <Skeleton className="h-16" />
-          <Skeleton className="h-16" />
-          <Skeleton className="h-16" />
-        </div>
-      )}
-      {!hasMore && (
-        <div className="flex-1 flex flex-col items-center justify-center gap-2">
-          <MessageSquare className="h-8 w-8 text-purple-700" />
-          <h3 className="font-semibold text-xl">No more messages to load</h3>
-        </div>
-      )}
-    </div>
+        {loading && (
+          <div className="w-full flex flex-col gap-2">
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+          </div>
+        )}
+        {!hasMore && (
+          <div className="flex-1 flex flex-col items-center justify-center gap-2">
+            <MessageSquare className="h-8 w-8 text-purple-700" />
+            <h3 className="font-semibold text-xl">No more messages to load</h3>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

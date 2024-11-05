@@ -1,4 +1,5 @@
 import { Role } from "@prisma/client";
+import { Message } from "ai";
 import { LucideIcon } from "lucide-react";
 
 export type SignUpFormState = {
@@ -36,10 +37,11 @@ export type HeadingProps = {
 };
 
 export type StreamResponse = {
-  addMessage: () => void;
-  message: string;
-  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  isLoading: boolean;
+  addMessage: (message: string) => void;
+  messages: Message[];
+  onStop: () => void;
+  isFetching: boolean;
+  getResponse: boolean;
 };
 
 export type ExtendedMessage = {
