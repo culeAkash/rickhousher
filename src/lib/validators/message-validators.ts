@@ -16,7 +16,12 @@ export const messageRequestSchema = z.object({
 });
 
 export const pdfMessageSchema = z.object({
-  message: z.string().min(1, { message: "Message can't be empty" }),
+  messages: z.array(
+    z.object({
+      role: z.enum(["USER", "assistant", "ASSISTANT", "user"]),
+      content: z.string(),
+    })
+  ),
   fileId: z.string({ message: "fileId must be string" }),
 });
 

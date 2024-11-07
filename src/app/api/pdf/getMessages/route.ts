@@ -85,7 +85,7 @@ export const POST = async (request: NextRequest) => {
       },
       take: fetchLimit + 1,
       orderBy: {
-        createdAt: "desc",
+        createdAt: "asc",
       },
       cursor: cursor ? { id: cursor } : undefined,
       select: {

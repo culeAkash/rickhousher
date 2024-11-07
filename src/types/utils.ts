@@ -40,8 +40,11 @@ export type StreamResponse = {
   addMessage: (message: string) => void;
   messages: Message[];
   onStop: () => void;
-  isFetching: boolean;
-  getResponse: boolean;
+  isFetchingFromDB: boolean;
+  gettingResponse: boolean;
+  isLoading: boolean;
+  fetchMoreMessages: () => void;
+  hasMore: boolean;
 };
 
 export type ExtendedMessage = {

@@ -34,6 +34,7 @@ export const POST = async (request: NextRequest) => {
   }
 
   const userId = session.user.id;
+  console.log(body);
 
   const { data, error } = pdfMessageSchema.safeParse(body);
 
@@ -49,7 +50,7 @@ export const POST = async (request: NextRequest) => {
     );
   }
 
-  const { fileId, message } = data;
+  const { fileId, messages } = data;
 
   const file = await db.file.findFirst({
     where: {
@@ -73,7 +74,7 @@ export const POST = async (request: NextRequest) => {
   try {
     await db.message.create({
       data: {
-        content: message,
+        content: messages[messages.length - 1].content,
         chatSessionId: file.chatSessionId,
         role: "USER",
       },
@@ -92,7 +93,10 @@ export const POST = async (request: NextRequest) => {
       namespace: file.id,
     });
 
-    const results = await vectorStore.similaritySearch(message, 4);
+    const results = await vectorStore.similaritySearch(
+      messages[messages.length - 1].content,
+      4
+    );
     // const context = results.map((r) => r.pageContent).join("\n\n");
     // console.log(context);
 
@@ -138,7 +142,7 @@ export const POST = async (request: NextRequest) => {
   CONTEXT:
   ${results.map((r) => r.pageContent).join("\n\n")}
   
-  USER INPUT: ${message}`,
+  USER INPUT: ${messages[messages.length - 1].content}`,
         },
       ]),
     });

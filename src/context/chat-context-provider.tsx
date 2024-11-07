@@ -7,11 +7,14 @@ import { useRouter } from "next/navigation";
 import { createContext, useEffect, useState } from "react";
 
 export const ChatContext = createContext<StreamResponse>({
-  addMessage: () => {},
+  addMessage: (message: string) => {},
   messages: [],
   onStop: () => {},
-  getResponse: false,
-  isFetching: false,
+  gettingResponse: false,
+  isFetchingFromDB: false,
+  isLoading: false,
+  fetchMoreMessages: () => {},
+  hasMore: true,
 });
 
 interface Props {
@@ -24,38 +27,26 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
   const router = useRouter();
   const proModal = useProModal();
 
-  const [getResponse, setGetResponse] = useState(false);
-  const [isFetching, setIsFetching] = useState(false);
+  const [gettingResponse, setGettingResponse] = useState(false);
+  const [isFetchingFromDB, setIsFetchingFromDB] = useState(false);
 
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
 
-  const { messages, setMessages, isLoading, stop, error, handleSubmit } =
-    useChat({
-      keepLastMessageOnError: true,
-      api: "/api/pdf",
-      onResponse: (response) => {
-        setGetResponse(false);
-        console.log(response.status);
-        if (response.status === 403) {
-          proModal.onOpen();
-        }
-      },
-      onFinish: async (message) => {
-        const response = await axios.post("/api/messages", {
-          chatType: "PDF",
-          message: message.content,
-          role: "ASSISTANT",
-        });
-        if (!response.data.success) {
-          toast({
-            title: "Error",
-            description: response.data.message,
-            variant: "destructive",
-          });
-        }
-      },
-    });
+  const { messages, setMessages, isLoading, stop, error, append } = useChat({
+    keepLastMessageOnError: true,
+    api: "/api/pdf",
+    body: {
+      fileId,
+    },
+    onResponse: (response) => {
+      setGettingResponse(false);
+      console.log(response.status);
+      if (response.status === 403) {
+        proModal.onOpen();
+      }
+    },
+  });
 
   useEffect(() => {
     if (error) {
@@ -74,27 +65,40 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
   useEffect(() => {
     async function fetchData() {
-      if (isFetching || !hasMore) return;
+      if (isFetchingFromDB || !hasMore) return;
       // setGetResponse(true);
-      setIsFetching(true);
-      const response = await axios.post("/api/pdf/getMessages", {
-        fileId,
-        cursor: nextCursor,
-        limit: 10,
-      });
+      setIsFetchingFromDB(true);
+      try {
+        const response = await axios.post("/api/pdf/getMessages", {
+          fileId,
+          cursor: nextCursor,
+          limit: 10,
+        });
 
-      const result = response.data;
-
-      if (result.success) {
-        setMessages(result.data.messages);
-        setNextCursor(result.data.nextCursor);
-        setHasMore(Boolean(result.data.nextCursor));
-      } else {
+        const result = response.data;
+        if (result.success) {
+          setMessages((prevMessages) => [
+            ...prevMessages,
+            ...result.data.messages,
+          ]);
+          setNextCursor(result.data.nextCursor);
+          setHasMore(Boolean(result.data.nextCursor));
+        } else {
+          toast({
+            title: "Error",
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error(error);
         toast({
           title: "Error",
-          description: result.message,
+          description: "Failed to fetch messages.",
           variant: "destructive",
         });
+      } finally {
+        setIsFetchingFromDB(false);
       }
     }
     fetchData();
@@ -104,64 +108,33 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     stop();
   };
 
-  const addMessage = (message: string) => {};
+  const addMessage = (message: string) => {
+    console.log(message);
+    setGettingResponse(true);
+    append({
+      role: "user",
+      content: message,
+    });
+  };
+
+  const fetchMoreMessages = async () => {};
+
+  console.log(messages);
 
   return (
     <ChatContext.Provider
       value={{
         messages,
         onStop,
-        getResponse,
-        isFetching,
+        gettingResponse,
+        isFetchingFromDB,
         addMessage,
+        isLoading,
+        fetchMoreMessages,
+        hasMore,
       }}
-    ></ChatContext.Provider>
+    >
+      {children}
+    </ChatContext.Provider>
   );
 };
-
-// export const ChatContextDemo = ({ fileId, children }: Props) => {
-//   const [message, setMessage] = useState<string>("");
-//   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-//   const { toast } = useToast();
-
-//   //   make api call to receive ai response based on file id and user message
-//   const sendMessage = async ({ message }: { message: string }) => {
-//     try {
-//       setIsLoading(true);
-
-//       const response = await axios.post("/api/pdf", {
-//         fileId,
-//         message,
-//       });
-
-//       console.log(response);
-//     } catch (error) {
-//       // error handling
-//     } finally {
-//       console.log("finally");
-
-//       setIsLoading(false);
-//       setMessage("");
-//     }
-//   };
-
-//   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     setMessage(event.target.value);
-//   };
-
-//   const addMessage = () => sendMessage({ message });
-
-//   return (
-//     <ChatContext.Provider
-//       value={{
-//         addMessage,
-//         message,
-//         handleInputChange,
-//         isLoading,
-//       }}
-//     >
-//       {children}
-//     </ChatContext.Provider>
-//   );
-// };
