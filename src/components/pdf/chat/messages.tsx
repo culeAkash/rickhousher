@@ -1,10 +1,11 @@
 "use client";
 import Empty from "@/components/empty";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare } from "lucide-react";
 import React, { useContext, useEffect, useRef } from "react";
 import MessageBox from "./message";
 import { ChatContext } from "@/context/chat-context-provider";
+import { MessageSquare } from "lucide-react";
+import { useIntersection } from "@mantine/hooks";
 
 const Messages = () => {
   const {
@@ -13,63 +14,52 @@ const Messages = () => {
     isFetchingFromDB,
     messages,
     hasMore,
+    resetScroll,
   } = useContext(ChatContext);
+
+  const messagesContainer = useRef<HTMLDivElement>(null);
+  const prevScrollHeight = useRef(0);
+
+  useEffect(() => {
+    if (messagesContainer.current) {
+      if (resetScroll)
+        messagesContainer.current.scrollTop =
+          -messagesContainer.current.scrollHeight;
+      else {
+        messagesContainer.current.scrollTop =
+          prevScrollHeight.current - messagesContainer.current.scrollHeight;
+      }
+      prevScrollHeight.current = messagesContainer.current.scrollHeight;
+    }
+  }, [messages, resetScroll]);
 
   console.log(messages);
 
-  const loadingMessage = {
-    createdAt: new Date(),
-    id: "loading-message",
-    isUserMessage: false,
-    content: (
-      <div className="p-8 w-full flex items-start gap-x-8 rounded-lg relative bg-red-800/10 border-red-800/10">
-        <Skeleton className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full" />
-        <div className="space-y-2 w-full">
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-      </div>
-    ),
-    role: "ASSISTANT",
-  };
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
-  const combinedMessages = [
-    ...(messages ?? []),
-    ...(gettingResponse ? [loadingMessage] : []),
-  ];
-
+  const { ref, entry } = useIntersection({
+    root: lastMessageRef.current,
+    threshold: 1,
+  });
   useEffect(() => {
-    const container = document.querySelector(".flex flex-col-reverse");
-    if (container) {
-      container.scrollTop = container.scrollHeight;
+    if (entry?.isIntersecting) {
+      fetchMoreMessages();
     }
-  }, [messages]);
+  }, [entry, fetchMoreMessages]);
 
-  if (!gettingResponse && !hasMore && combinedMessages.length === 0) {
+  if (!isFetchingFromDB && !hasMore && messages.length === 0) {
     return (
       <Empty label="You are all set... Start asking your first question" />
     );
   }
 
-  console.log(combinedMessages);
-
   return (
     <>
-      {messages.length === 0 && !isFetchingFromDB && (
-        <Empty label="No Conversation Started" />
-      )}
       <div className="space-y-4 mt-4 px-2">
-        <div className="flex flex-col-reverse max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200 flex-1 gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-round scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch">
-          {combinedMessages &&
-            combinedMessages.length > 0 &&
-            combinedMessages.map((message, index) => {
-              if (0 === index) {
-                return <MessageBox key={index} message={message} />;
-              } else {
-                return <MessageBox key={index} message={message} />;
-              }
-            })}
-
+        <div
+          ref={messagesContainer}
+          className="flex flex-col-reverse max-h-[calc(100vh-3.5rem-7rem)] border-zinc-200 flex-1 gap-4 p-3 overflow-y-auto scrollbar-thumb-blue scrollbar-thumb-round scrollbar-track-blue-lighter scrollbar-w-2 scrolling-touch"
+        >
           {isFetchingFromDB && (
             <div className="w-full flex flex-col gap-2">
               <Skeleton className="h-16" />
@@ -78,12 +68,30 @@ const Messages = () => {
               <Skeleton className="h-16" />
             </div>
           )}
-          {!hasMore && (
-            <div className="flex-1 flex flex-col items-center justify-center gap-2">
-              <MessageSquare className="h-8 w-8 text-purple-700" />
-              <h3 className="font-semibold text-xl">
-                No more messages to load
-              </h3>
+          {!hasMore && messages.length > 0 && (
+            <div className="flex gap-x-3 justify-center">
+              <MessageSquare />
+              <p className="text-sm text-zinc-500">End of conversation</p>
+            </div>
+          )}
+          {messages &&
+            messages.length > 0 &&
+            messages.map((message, index) => {
+              if (0 === index) {
+                return (
+                  <MessageBox ref={ref} key={message.id} message={message} />
+                );
+              } else {
+                return <MessageBox key={message.id} message={message} />;
+              }
+            })}
+          {gettingResponse && (
+            <div className="p-8 w-full flex items-start gap-x-8 rounded-lg relative bg-red-800/10 border-red-800/10">
+              <Skeleton className="flex h-10 w-10 shrink-0 overflow-hidden rounded-full" />
+              <div className="space-y-2 w-full">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
             </div>
           )}
         </div>

@@ -140,8 +140,6 @@ const ChatSection = () => {
     fetchData();
   }, [setMessages, toast]);
 
-  // console.log(messages);
-
   return (
     <>
       <div className="space-y-4 mt-4">

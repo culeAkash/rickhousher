@@ -1,4 +1,3 @@
-import { Role } from "@prisma/client";
 import { Message } from "ai";
 import { LucideIcon } from "lucide-react";
 
@@ -45,11 +44,5 @@ export type StreamResponse = {
   isLoading: boolean;
   fetchMoreMessages: () => void;
   hasMore: boolean;
-};
-
-export type ExtendedMessage = {
-  id: string;
-  content: string | JSX.Element;
-  createdAt: Date;
-  role: string;
+  resetScroll: boolean;
 };

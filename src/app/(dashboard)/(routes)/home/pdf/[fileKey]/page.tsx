@@ -30,7 +30,7 @@ const FilePage = async ({ params }: PageProps) => {
 
   return (
     <>
-      <div className="flex-1 justify-between flex flex-col h-[calc(100vh-3.5rem)]">
+      <div className="flex-1 justify-between flex flex-col md:h-[calc(100vh-3.5rem)] h-fit">
         <div className="mx-auto w-full max-w-8xl grow lg:flex xl:px-2">
           {/* Left side */}
           <div className="flex-1 xl:flex">

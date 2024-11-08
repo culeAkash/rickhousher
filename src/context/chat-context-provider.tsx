@@ -4,7 +4,8 @@ import { StreamResponse } from "@/types/utils";
 import { useChat } from "ai/react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
+import { Message } from "ai/react";
 
 export const ChatContext = createContext<StreamResponse>({
   addMessage: (message: string) => {},
@@ -15,6 +16,7 @@ export const ChatContext = createContext<StreamResponse>({
   isLoading: false,
   fetchMoreMessages: () => {},
   hasMore: true,
+  resetScroll: true,
 });
 
 interface Props {
@@ -29,6 +31,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
   const [gettingResponse, setGettingResponse] = useState(false);
   const [isFetchingFromDB, setIsFetchingFromDB] = useState(false);
+  const resetScroll = useRef(true);
 
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState<boolean>(true);
@@ -67,6 +70,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     async function fetchData() {
       if (isFetchingFromDB || !hasMore) return;
       // setGetResponse(true);
+      resetScroll.current = true;
       setIsFetchingFromDB(true);
       try {
         const response = await axios.post("/api/pdf/getMessages", {
@@ -79,7 +83,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
         if (result.success) {
           setMessages((prevMessages) => [
             ...prevMessages,
-            ...result.data.messages,
+            ...result.data.responseMessages,
           ]);
           setNextCursor(result.data.nextCursor);
           setHasMore(Boolean(result.data.nextCursor));
@@ -110,6 +114,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
   const addMessage = (message: string) => {
     console.log(message);
+    resetScroll.current = true;
     setGettingResponse(true);
     append({
       role: "user",
@@ -117,7 +122,46 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
     });
   };
 
-  const fetchMoreMessages = async () => {};
+  const fetchMoreMessages = async () => {
+    async function fetchData() {
+      if (isFetchingFromDB || !hasMore) return;
+      setIsFetchingFromDB(true);
+      resetScroll.current = false;
+      try {
+        const response = await axios.post("/api/pdf/getMessages", {
+          fileId,
+          cursor: nextCursor,
+          limit: 10,
+        });
+
+        const result = response.data;
+        if (result.success) {
+          setMessages((prevMessages) => [
+            ...result.data.responseMessages,
+            ...prevMessages,
+          ]);
+          setNextCursor(result.data.nextCursor);
+          setHasMore(Boolean(result.data.nextCursor));
+        } else {
+          toast({
+            title: "Error",
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error(error);
+        toast({
+          title: "Error",
+          description: "Failed to fetch messages.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsFetchingFromDB(false);
+      }
+    }
+    fetchData();
+  };
 
   console.log(messages);
 
@@ -132,6 +176,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
         isLoading,
         fetchMoreMessages,
         hasMore,
+        resetScroll: resetScroll.current,
       }}
     >
       {children}

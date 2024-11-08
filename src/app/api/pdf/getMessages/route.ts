@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { AuthOptions } from "../../auth/[...nextauth]/options";
 import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 import { db } from "@/db";
+import { Message } from "ai";
 
 export const POST = async (request: NextRequest) => {
   const body = await request.json();
@@ -84,9 +85,6 @@ export const POST = async (request: NextRequest) => {
         chatSessionId,
       },
       take: fetchLimit + 1,
-      orderBy: {
-        createdAt: "asc",
-      },
       cursor: cursor ? { id: cursor } : undefined,
       select: {
         id: true,
@@ -103,11 +101,29 @@ export const POST = async (request: NextRequest) => {
       nextCursor = nextMessage?.id;
     }
 
+    const responseMessages: Message[] = [];
+
+    messages.forEach((message) => {
+      if (message.role === "USER") {
+        responseMessages.push({
+          id: message.id,
+          role: "user",
+          content: message.content,
+        });
+      } else {
+        responseMessages.push({
+          id: message.id,
+          role: "assistant",
+          content: message.content,
+        });
+      }
+    });
+
     return NextResponse.json(
       {
         success: true,
         data: {
-          messages,
+          responseMessages,
           nextCursor,
         },
       },
