@@ -109,6 +109,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
   }, [fileId, setMessages, toast]);
 
   const onStop = () => {
+    setGettingResponse(false);
     stop();
   };
 
@@ -120,6 +121,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       role: "user",
       content: message,
     });
+    router.refresh();
   };
 
   const fetchMoreMessages = async () => {

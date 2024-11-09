@@ -8,6 +8,7 @@ import { pinecone } from "@/lib/pinecone";
 import { PineconeStore } from "@langchain/pinecone";
 import { convertToCoreMessages, streamText } from "ai";
 import { createMistral } from "@ai-sdk/mistral";
+import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
 
 const apiKey = process.env.MISTRAL_API_KEY;
 const mistral = createMistral({
@@ -70,6 +71,24 @@ export const POST = async (request: NextRequest) => {
       }
     );
   }
+
+  const freeTrial = await checkApiLimit();
+
+  console.log(freeTrial);
+
+  if (!freeTrial) {
+    return Response.json(
+      {
+        success: false,
+        message:
+          "Your free trial has ended, please switch to pro plan to continue using...",
+      },
+      {
+        status: 403,
+      }
+    );
+  }
+  await increaseApiLimit();
 
   try {
     await db.message.create({
