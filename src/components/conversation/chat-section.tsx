@@ -45,6 +45,7 @@ const ChatSection = () => {
       }
     },
     onFinish: async (message) => {
+      router.refresh();
       const response = await axios.post("/api/messages", {
         chatType: "CONVERSATION",
         message: message.content,
@@ -93,8 +94,6 @@ const ChatSection = () => {
       content: prompt,
     });
     form.reset();
-
-    router.refresh();
   };
 
   useEffect(() => {

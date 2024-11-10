@@ -2,9 +2,9 @@ import { Popover, PopoverContent } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { LogOut, User } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
 import ProfileSheet from "../profile-sheet";
+import LogoutButton from "./logout-button";
 const NavbarProfilePop = ({ user }) => {
   return (
     <Popover>
@@ -25,14 +25,7 @@ const NavbarProfilePop = ({ user }) => {
             Pricing
           </p>
           <Separator />
-          <Button
-            variant="destructive"
-            size="sm"
-            className="w-full space-x-1 text-sm font-serif"
-          >
-            <LogOut />
-            <span>Logout</span>
-          </Button>
+          <LogoutButton />
         </div>
       </PopoverContent>
     </Popover>

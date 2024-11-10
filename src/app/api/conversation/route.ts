@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 import { convertToCoreMessages, streamText } from "ai";
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { checkSubscription } from "@/lib/subscription";
 
 const apiKey = process.env.MISTRAL_API_KEY;
 
@@ -57,10 +58,12 @@ export const POST = async (request: Request) => {
     //get response from AI
 
     const freeTrial = await checkApiLimit();
+    const isPro = checkSubscription();
+    console.log("is pro", isPro);
 
-    console.log(freeTrial);
+    console.log("In route", freeTrial);
 
-    if (!freeTrial) {
+    if (!freeTrial && !isPro) {
       return Response.json(
         {
           success: false,
@@ -72,7 +75,7 @@ export const POST = async (request: Request) => {
         }
       );
     }
-    await increaseApiLimit();
+    if (!isPro) await increaseApiLimit();
 
     const model = mistral("mistral-large-latest");
 

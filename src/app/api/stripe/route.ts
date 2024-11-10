@@ -6,7 +6,7 @@ import { AuthOptions } from "../auth/[...nextauth]/options";
 import { absoluteUrl } from "@/lib/utils";
 import { stripe } from "@/lib/stripe";
 
-const settingsUrl = absoluteUrl("/settings");
+const settingsUrl = absoluteUrl("/home/settings");
 
 export const GET = async (request: NextRequest) => {
   const session = await getServerSession(AuthOptions);

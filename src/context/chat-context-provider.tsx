@@ -49,6 +49,9 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
         proModal.onOpen();
       }
     },
+    onFinish: async (message) => {
+      router.refresh();
+    },
   });
 
   useEffect(() => {
@@ -121,7 +124,6 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       role: "user",
       content: message,
     });
-    router.refresh();
   };
 
   const fetchMoreMessages = async () => {

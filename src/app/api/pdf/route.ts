@@ -9,6 +9,7 @@ import { PineconeStore } from "@langchain/pinecone";
 import { convertToCoreMessages, streamText } from "ai";
 import { createMistral } from "@ai-sdk/mistral";
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { checkSubscription } from "@/lib/subscription";
 
 const apiKey = process.env.MISTRAL_API_KEY;
 const mistral = createMistral({
@@ -73,10 +74,11 @@ export const POST = async (request: NextRequest) => {
   }
 
   const freeTrial = await checkApiLimit();
+  const isPro = await checkSubscription();
 
   console.log(freeTrial);
 
-  if (!freeTrial) {
+  if (!freeTrial && !isPro) {
     return Response.json(
       {
         success: false,
@@ -88,7 +90,7 @@ export const POST = async (request: NextRequest) => {
       }
     );
   }
-  await increaseApiLimit();
+  if (!isPro) await increaseApiLimit();
 
   try {
     await db.message.create({
