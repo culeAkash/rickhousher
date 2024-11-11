@@ -56,7 +56,7 @@ export const POST = async (request: Request) => {
     }
 
     const freeTrial = checkApiLimit();
-    const isPro = checkSubscription();
+    const isPro = await checkSubscription();
 
     console.log("In route", isPro);
 

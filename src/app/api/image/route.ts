@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
   console.log(width);
 
   const freeTrial = checkApiLimit();
-  const isPro = checkSubscription();
+  const isPro = await checkSubscription();
 
   if (!freeTrial && !isPro) {
     return Response.json(

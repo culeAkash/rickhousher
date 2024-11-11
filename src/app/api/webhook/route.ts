@@ -16,7 +16,7 @@ export const POST = async (request: NextRequest) => {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error with Stripe webhook:", error);
     return NextResponse.json(
       {
@@ -28,6 +28,8 @@ export const POST = async (request: NextRequest) => {
       }
     );
   }
+
+  // console.log(event.data.object.);
 
   const session = event.data.object as Stripe.Checkout.Session;
 

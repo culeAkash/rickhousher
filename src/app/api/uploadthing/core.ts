@@ -10,7 +10,7 @@ import { PineconeStore } from "@langchain/pinecone";
 
 const f = createUploadthing();
 export const ourFileRouter = {
-  pdfUploader: f({ pdf: { maxFileSize: "4MB" } })
+  pdfUploader: f({ pdf: { maxFileSize: "16MB" } })
     .middleware(async ({ req }) => {
       // TODO : Authorize the user
       const session = await getServerSession(AuthOptions);

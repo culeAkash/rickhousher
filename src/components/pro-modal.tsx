@@ -16,7 +16,6 @@ import { cn } from "@/lib/utils";
 import { Check, Zap } from "lucide-react";
 import { Button } from "./ui/button";
 import axios, { AxiosError } from "axios";
-import { redirect } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
 const ProModal = () => {
@@ -80,6 +79,7 @@ const ProModal = () => {
             variant={"premium"}
             className="w-full"
             onClick={onSubscribe}
+            disabled={loading}
           >
             Upgrade
             <Zap className="w-4 h-4 ml-2 fill-white" />

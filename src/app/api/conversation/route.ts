@@ -58,7 +58,7 @@ export const POST = async (request: Request) => {
     //get response from AI
 
     const freeTrial = await checkApiLimit();
-    const isPro = checkSubscription();
+    const isPro = await checkSubscription();
     console.log("is pro", isPro);
 
     console.log("In route", freeTrial);

@@ -4,6 +4,7 @@ import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import ModalProvider from "@/components/modal-provider";
+import { CrispProvider } from "@/components/crisp-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <AuthProvider>
+        <CrispProvider />
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >

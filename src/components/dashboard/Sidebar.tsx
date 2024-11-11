@@ -64,7 +64,7 @@ const routes: SidebarRoute[] = [
     label: "Settings",
     icon: Settings,
     href: "/home/settings",
-    color: "text-gray-900",
+    color: "text-gray-200",
   },
 ];
 
