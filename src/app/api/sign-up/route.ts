@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { dbConnect } from "@/utils/db";
+import { db } from "@/db";
 
 import { ApiResponse } from "@/types/ApiResponse";
 import bcrypt from "bcryptjs";
-import { db } from "@/db";
 
 export async function POST(request: NextRequest) {
-  await dbConnect();
   try {
     const { username, email, password } = await request.json();
 

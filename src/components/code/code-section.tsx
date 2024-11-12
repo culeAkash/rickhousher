@@ -209,7 +209,7 @@ const CodeSection = () => {
                 <ReactMarkDown
                   components={{
                     pre: ({ node, ...props }) => (
-                      <div className="overflow-auto w-full my-2 bg-black/10 p-5 rounded-lg relative">
+                      <div className="overflow-auto block w-full my-2 bg-black/10 p-5 rounded-lg relative">
                         <Button
                           type="button"
                           className="absolute right-3 top-2 hover:bg-background hover:text-gray-950 border-2

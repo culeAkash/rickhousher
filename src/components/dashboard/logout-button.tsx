@@ -22,7 +22,7 @@ const LogoutButton = () => {
     <Button
       variant="destructive"
       size="sm"
-      className="w-full space-x-1 text-sm font-serif"
+      className="w-full space-x-1 text-sm font-serif mt-2"
       onClick={onLogout}
     >
       <LogOut />

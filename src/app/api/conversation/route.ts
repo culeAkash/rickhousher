@@ -60,7 +60,6 @@ export const POST = async (request: Request) => {
     const freeTrial = await checkApiLimit();
     const isPro = await checkSubscription();
     console.log("is pro", isPro);
-
     console.log("In route", freeTrial);
 
     if (!freeTrial && !isPro) {

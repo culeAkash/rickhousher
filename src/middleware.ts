@@ -30,6 +30,13 @@ export async function middleware(request: NextRequest) {
     // console.log("not dashboard");
     return NextResponse.redirect(new URL("/auth/sign-in", request.url));
   }
+
+  if (url.pathname === "/home/settings") {
+    // console.log("settings");
+    return NextResponse.redirect(
+      new URL("/home/settings/profile", request.url)
+    );
+  }
 }
 
 export const config = {

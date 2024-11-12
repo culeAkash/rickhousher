@@ -3,9 +3,9 @@ import { Separator } from "@/components/ui/separator";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { User } from "lucide-react";
-import ProfileSheet from "../profile-sheet";
 import LogoutButton from "./logout-button";
-const NavbarProfilePop = ({ user }) => {
+import NavPopLink from "./navbar-popover-link";
+const NavbarProfilePop = async ({ user }) => {
   return (
     <Popover>
       <PopoverTrigger asChild className="cursor-pointer">
@@ -16,17 +16,16 @@ const NavbarProfilePop = ({ user }) => {
           </AvatarFallback>
         </Avatar>
       </PopoverTrigger>
-      <PopoverContent className="md:w-50 h-fit mr-3 w-40">
-        <div className="space-y-1">
-          <p className="text-muted-foreground text-md">Hi Akash</p>
-          <Separator />
-          <ProfileSheet />
-          <p className="font-mono pl-1 hover:border-black hover:shadow-md border-transparent border-2 rounded-sm cursor-pointer hover:bg-gray-700 hover:text-white">
-            Pricing
-          </p>
-          <Separator />
-          <LogoutButton />
+      <PopoverContent className="w-fit h-fit mr-2 px-5">
+        <div className="flex flex-col mb-3">
+          <p className="text-semibold text-md">{user?.username ?? "User"}</p>
+          <p className="text-muted-foreground text-sm">{user?.email}</p>
         </div>
+        <Separator />
+        <NavPopLink label="Profile" link="/home/settings/profile" />
+        <NavPopLink label="Pricing" link="/home/settings/pricing" />
+        <Separator />
+        <LogoutButton />
       </PopoverContent>
     </Popover>
   );

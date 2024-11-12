@@ -62,7 +62,7 @@ const LoginPage = () => {
       });
       setIsFormSubmitting(false);
       form.reset();
-      router.push("/dashboard"); // redirect to dashboard
+      router.push("/home/dashboard"); // redirect to dashboard
     }
   };
 
