@@ -109,7 +109,7 @@ export const AuthOptions: NextAuthOptions = {
           //create new user
           savedUser = await db.user.create({
             data: {
-              username: profile?.login ?? undefined,
+              username: profile?.login ?? (profile?.email as string),
               email: profile?.email as string,
               image:
                 (profile?.picture as string) ??

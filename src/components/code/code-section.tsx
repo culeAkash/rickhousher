@@ -37,7 +37,7 @@ const CodeSection = () => {
 
   const { messages, setMessages, isLoading, stop, append, error } = useChat({
     keepLastMessageOnError: true,
-    api: "/api/conversation",
+    api: "/api/code",
     onResponse: (response) => {
       setGetResponse(false);
       console.log(response);
@@ -46,6 +46,7 @@ const CodeSection = () => {
       }
     },
     onFinish: async (message) => {
+      router.refresh();
       const response = await axios.post("/api/messages", {
         chatType: "CODE",
         message: message.content,
@@ -93,8 +94,6 @@ const CodeSection = () => {
       role: "user",
       content: prompt,
     });
-
-    router.refresh();
   };
 
   console.log(messages);
@@ -190,7 +189,9 @@ const CodeSection = () => {
           {messages.length === 0 && !isFetching && (
             <Empty label="No Conversation Started" />
           )}
-          {messages.length === 0 && isFetching && <Loader />}
+          {messages.length === 0 && isFetching && (
+            <Loader label="Getting your desired result... Please wait..." />
+          )}
         </div>
         <div className="flex flex-col-reverse gap-y-4">
           {messages.map((message, index) => {

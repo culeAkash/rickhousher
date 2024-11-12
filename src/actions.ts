@@ -1,4 +1,6 @@
 "use server";
+import { UploadStatus } from "@prisma/client";
+import { db } from "./db";
 import { signupSchema } from "./schemas/SignUpSchema";
 import { ApiResponse } from "./types/ApiResponse";
 import { SignUpFormState } from "./types/utils";
@@ -71,3 +73,28 @@ export const onSignUpSubmit = async (
     errors: {},
   };
 };
+
+export async function getFileUploadStatus({
+  fileId,
+  userId,
+}: {
+  fileId: string;
+  userId: string;
+}): Promise<UploadStatus> {
+  if (!fileId || !userId) {
+    return "PENDING" as const;
+  }
+
+  try {
+    const file = await db.file.findFirst({
+      where: {
+        id: fileId,
+        userId,
+      },
+    });
+    return file ? file.fileUploadStatus : ("PENDING" as const);
+  } catch (error) {
+    console.log(error);
+    return "PENDING" as const;
+  }
+}

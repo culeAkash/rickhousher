@@ -22,7 +22,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/home/dashboard", request.url));
   }
 
-  if (url.pathname.startsWith("/home") && !token) {
+  if (
+    url.pathname.startsWith("/home") &&
+    !url.pathname.startsWith("/home/settings") &&
+    !token
+  ) {
     // console.log("not dashboard");
     return NextResponse.redirect(new URL("/auth/sign-in", request.url));
   }

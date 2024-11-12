@@ -4,20 +4,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import z from "zod";
 import { Message } from "ai";
-
-const getMessageSchema = z.object({
-  chatType: z.enum(["CONVERSATION", "CODE"], {
-    message: "Please give proper chat type",
-  }),
-});
-
-const messageRequest = z.object({
-  message: z.string().min(1, { message: "Message can't be empty" }),
-  chatType: z.enum(["CONVERSATION", "CODE"], {
-    message: "Please give proper chat type",
-  }),
-  role: z.enum(["USER", "ASSISTANT"], { message: "Please give proper role" }),
-});
+import {
+  getMessageSchema,
+  messageRequestSchema,
+} from "@/lib/validators/message-validators";
 
 export const GET = async (request: NextRequest) => {
   const session = await getServerSession(AuthOptions);
@@ -146,7 +136,7 @@ export const POST = async (request: NextRequest) => {
   const userId = session.user.id;
   const requestData = await request.json();
 
-  const { data, error } = messageRequest.safeParse(requestData);
+  const { data, error } = messageRequestSchema.safeParse(requestData);
 
   if (error) {
     return NextResponse.json(

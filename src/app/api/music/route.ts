@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "../auth/[...nextauth]/options";
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit";
+import { checkSubscription } from "@/lib/subscription";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(AuthOptions);
@@ -45,8 +46,9 @@ export async function POST(request: NextRequest) {
   }
 
   const freeTrial = checkApiLimit();
+  const isPro = await checkSubscription();
 
-  if (!freeTrial) {
+  if (!freeTrial && !isPro) {
     return Response.json(
       {
         success: false,
@@ -77,8 +79,7 @@ export async function POST(request: NextRequest) {
     if (!response.ok) {
       throw new Error(response.statusText);
     }
-
-    await increaseApiLimit();
+    if (!isPro) await increaseApiLimit();
 
     const result = await response.blob();
     const arrayBuffer = await result.arrayBuffer();

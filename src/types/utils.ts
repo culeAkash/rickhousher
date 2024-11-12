@@ -1,3 +1,4 @@
+import { Message } from "ai";
 import { LucideIcon } from "lucide-react";
 
 export type SignUpFormState = {
@@ -32,4 +33,16 @@ export type HeadingProps = {
   icon: LucideIcon;
   iconColor?: string;
   bgColor?: string;
+};
+
+export type StreamResponse = {
+  addMessage: (message: string) => void;
+  messages: Message[];
+  onStop: () => void;
+  isFetchingFromDB: boolean;
+  gettingResponse: boolean;
+  isLoading: boolean;
+  fetchMoreMessages: () => void;
+  hasMore: boolean;
+  resetScroll: boolean;
 };
