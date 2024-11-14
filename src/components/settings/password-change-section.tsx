@@ -14,6 +14,7 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Eye, EyeOff } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 interface showPasswordOptions {
   showOldPassword: boolean;
@@ -29,6 +30,7 @@ const PasswordChangeSection = () => {
   });
 
   const form = useForm<z.infer<typeof passwordChangeFormSchema>>({
+    resolver: zodResolver(passwordChangeFormSchema),
     defaultValues: {
       oldPassword: "",
       newPassword: "",
@@ -36,9 +38,22 @@ const PasswordChangeSection = () => {
     },
   });
 
+  const { setError } = form;
+
   const passwordChangeHandler = async (
     formData: z.infer<typeof passwordChangeFormSchema>
-  ) => {};
+  ) => {
+    // Perform password change logic here
+    const { oldPassword, newPassword, confirmPassword } = formData;
+
+    if (newPassword !== confirmPassword) {
+      setError("confirmPassword", { message: "Passwords do not match" });
+      return;
+    }
+
+    try {
+    } catch (error) {}
+  };
 
   return (
     <Form {...form}>

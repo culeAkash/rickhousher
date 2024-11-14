@@ -94,6 +94,37 @@ export const ourFileRouter = {
         });
       }
     }),
+  imageUploader: f({ image: { maxFileSize: "4MB" } })
+    .middleware(async ({ req }) => {
+      const session = await getServerSession(AuthOptions);
+
+      if (!session || !session?.user || !session?.user.id) {
+        throw new UploadThingError("Not Authorized");
+      }
+
+      // Whatever is returned here is accessible in onUploadComplete as `metadata`
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Upload complete for userId:", metadata.userId);
+      console.log("file url", file.url);
+
+      //update the user with the image url
+      try {
+        const updatedUser = await db.user.update({
+          where: {
+            id: metadata.userId,
+          },
+          data: {
+            image: file.url,
+          },
+        });
+
+        console.log(updatedUser);
+      } catch (error) {
+        console.log(error);
+      }
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

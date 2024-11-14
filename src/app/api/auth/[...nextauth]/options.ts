@@ -124,6 +124,7 @@ export const AuthOptions: NextAuthOptions = {
         user.id = savedUser?.id as string;
         user.username = savedUser?.username;
         user.isSubscribed = savedUser?.isSubscribed;
+        user.image = savedUser?.image;
 
         // console.log(user);
 

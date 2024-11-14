@@ -1,13 +1,11 @@
 "use client";
 import { profileInfoFormSchema } from "@/schemas/profileSchema";
-import { useSession } from "next-auth/react";
 import React, { ChangeEvent, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -15,26 +13,42 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { User } from "lucide-react";
 import userImage from "../../../public/user.png";
 import Image from "next/image";
 import { Button } from "../ui/button";
+import axios, { AxiosError } from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { useUploadThing } from "@/utils/uploadthing";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const BasicInfoUpdateSection = () => {
-  const { data: session } = useSession();
-
-  console.log(session?.user);
-
+const BasicInfoUpdateSection = ({
+  name = "",
+  username = "",
+  image = "",
+}: {
+  name: string;
+  username: string;
+  image: string;
+}) => {
   const form = useForm<z.infer<typeof profileInfoFormSchema>>({
+    resolver: zodResolver(profileInfoFormSchema),
     defaultValues: {
-      name: session?.user.name ?? "",
-      username: session?.user.username ?? "",
-      image: undefined,
+      name: name ?? "",
+      username: username ?? "",
     },
   });
 
+  const { setError } = form;
+
   const inputImageRef = useRef<HTMLInputElement>(null);
   const [renderImage, setRenderImage] = useState<File | null>(null);
+  const { toast } = useToast();
+  const router = useRouter();
+
+  const { startUpload } = useUploadThing("imageUploader");
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleImageClick = () => {
     inputImageRef.current?.click();
@@ -48,7 +62,62 @@ const BasicInfoUpdateSection = () => {
 
   const profileChangeHandler = async (
     formData: z.infer<typeof profileInfoFormSchema>
-  ) => {};
+  ) => {
+    try {
+      setIsUpdating(true);
+      const { name: formName, username: formUsername } = formData;
+      console.log(formName, formUsername);
+      console.log(renderImage);
+
+      if (name !== formName || username !== formUsername) {
+        const response = await axios.get(
+          `/api/checkusername?username=${formUsername}`
+        );
+
+        if (response.data.data.isPresent) {
+          setError("username", {
+            message: "Username already exists, try again.",
+          });
+          return;
+        }
+
+        await axios.patch("/api/updateprofile", {
+          name: formName,
+          username: formUsername,
+        });
+      }
+
+      if (renderImage) {
+        const res = await startUpload([renderImage]);
+
+        if (!res) {
+          toast({
+            title: "Error",
+            description: "Failed to upload image",
+            variant: "destructive",
+          });
+        }
+      }
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+        variant: "default",
+      });
+      router.refresh();
+    } catch (error) {
+      const axiosError = error as AxiosError;
+      console.error(axiosError.message);
+      // handle errors as needed
+      toast({
+        title: "Error",
+        description: axiosError.message,
+        variant: "default",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <Form {...form}>
@@ -83,9 +152,6 @@ const BasicInfoUpdateSection = () => {
                   <FormControl>
                     <Input placeholder="shadcn" {...field} />
                   </FormControl>
-                  <FormDescription className="text-green-500">
-                    This is your public display name.
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -96,17 +162,14 @@ const BasicInfoUpdateSection = () => {
             onClick={handleImageClick}
           >
             {renderImage ? (
-              <div className="h-48 w-48 overflow-hidden">
+              <div className="h-48 w-48 overflow-hidden relative">
                 <Image src={URL.createObjectURL(renderImage)} alt="" fill />
               </div>
-            ) : session?.user.image ? (
+            ) : image ? (
               <Avatar className="h-48 w-48">
-                <AvatarImage
-                  src={`${session.user?.image}`}
-                  alt={session.user?.username}
-                />
+                <AvatarImage src={`${image}`} alt={username} />
                 <AvatarFallback delayMs={100}>
-                  <User />
+                  <Image src={userImage} alt="" />
                 </AvatarFallback>
               </Avatar>
             ) : (
@@ -114,23 +177,24 @@ const BasicInfoUpdateSection = () => {
                 <Image src={userImage} alt="" />
               </div>
             )}
-            <FormField
-              name="image"
-              control={form.control}
-              render={({ field }) => (
-                <Input
-                  type="file"
-                  ref={inputImageRef}
-                  onChange={handlerImageChange}
-                  className="hidden"
-                />
-              )}
+            <Input
+              type="file"
+              ref={inputImageRef}
+              onChange={handlerImageChange}
+              className="hidden"
             />
           </div>
         </div>
         <div className="flex justify-end mt-4">
           <Button variant={"default"} size={"lg"}>
-            Update
+            {isUpdating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Please wait ...
+              </>
+            ) : (
+              <span className="font-bold font-sans">Update</span>
+            )}
           </Button>
         </div>
       </form>
