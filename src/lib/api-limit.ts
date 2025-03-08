@@ -51,7 +51,7 @@ export const checkApiLimit = async () => {
 
   console.log(userApiLimit);
 
-  if (!userApiLimit || userApiLimit.count <= MAX_FREE_USAGE_COUNTS) return true;
+  if (!userApiLimit || userApiLimit.count < MAX_FREE_USAGE_COUNTS) return true;
 
   return false;
 };

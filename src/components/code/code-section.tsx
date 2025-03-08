@@ -23,7 +23,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "../ui/skeleton";
 import ReactMarkDown from "react-markdown";
 import Loader from "../loader";
-import { Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useProModal } from "@/hooks/use-pro-modal";
 
@@ -206,45 +205,7 @@ const CodeSection = () => {
                 )}
               >
                 {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-                <ReactMarkDown
-                  components={{
-                    pre: ({ node, ...props }) => (
-                      <div className="overflow-auto block w-full my-2 bg-black/10 p-5 rounded-lg relative">
-                        <Button
-                          type="button"
-                          className="absolute right-3 top-2 hover:bg-background hover:text-gray-950 border-2
-                          border-muted hover:border-black box-border"
-                          variant={"ghost"}
-                          onClick={(event) => {
-                            const preElement = (
-                              event?.target as Element
-                            )?.closest("div");
-
-                            if (preElement) {
-                              const pre = preElement.querySelector("pre");
-                              if (pre) {
-                                navigator.clipboard.writeText(
-                                  pre.textContent ?? ""
-                                );
-                                toast({
-                                  title: "Copied",
-                                  description: "Copied to clipboard",
-                                });
-                              }
-                            }
-                          }}
-                        >
-                          <Copy />
-                        </Button>
-                        <pre {...props} />
-                      </div>
-                    ),
-                    code: ({ node, ...props }) => (
-                      <code className="bg-black/10 rounded-lg p-1" {...props} />
-                    ),
-                  }}
-                  className="text-sm overflow-hidden leading-7"
-                >
+                <ReactMarkDown className="text-sm overflow-auto leading-7 font-serif">
                   {message.content || ""}
                 </ReactMarkDown>
               </div>

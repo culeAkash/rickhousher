@@ -7,11 +7,15 @@ import bcrypt from "bcryptjs";
 export async function POST(request: NextRequest) {
   try {
     const { username, email, password } = await request.json();
+    const userEmail = email.toLowerCase();
 
     // check if user with same name or email already exists
     const existingUserByUsernameOrEmail = await db.user.findFirst({
       where: {
-        OR: [{ username: { equals: username } }, { email: { equals: email } }],
+        OR: [
+          { username: { equals: username } },
+          { email: { equals: userEmail } },
+        ],
       },
     });
 
@@ -33,7 +37,7 @@ export async function POST(request: NextRequest) {
     await db.user.create({
       data: {
         username,
-        email,
+        email: userEmail,
         password: hashedPassword,
         isSubscribed: false,
       },

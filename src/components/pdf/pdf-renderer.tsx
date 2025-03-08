@@ -35,6 +35,7 @@ const renderError = (error: LoadError) => {
 
 const PdfRenderer = ({ fileUrl }: PdfRendererProps) => {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
+  console.log(fileUrl);
 
   return (
     <div className="w-full bg-gray-100 rounded-md flex flex-col items-center">
@@ -47,7 +48,7 @@ const PdfRenderer = ({ fileUrl }: PdfRendererProps) => {
       </div> */}
       <div className="flex-1 w-full max-h-[90vh] overflow-auto">
         <Worker
-          workerUrl={`https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js`}
+          workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.js`}
         >
           <div className="h-[1000px]">
             <Viewer
