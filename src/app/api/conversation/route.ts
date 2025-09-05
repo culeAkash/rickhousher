@@ -76,7 +76,7 @@ export const POST = async (request: Request) => {
     }
     if (!isPro) await increaseApiLimit();
 
-    const model = mistral("mistral-large-latest");
+    const model = mistral("mistral-small-latest");
 
     const result = await streamText({
       model,

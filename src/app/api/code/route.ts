@@ -75,7 +75,7 @@ export const POST = async (request: Request) => {
 
     //get response from AI
 
-    const model = mistral("mistral-large-latest");
+    const model = mistral("mistral-small-latest");
 
     const result = await streamText({
       model,

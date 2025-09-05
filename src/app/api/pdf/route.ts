@@ -137,7 +137,7 @@ export const POST = async (request: NextRequest) => {
       content: message.content,
     }));
 
-    const model = mistral("mistral-large-latest");
+    const model = mistral("mistral-small-latest");
     const chatResult = await streamText({
       model,
       messages: convertToCoreMessages([
